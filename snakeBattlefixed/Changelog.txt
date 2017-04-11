@@ -1,0 +1,4 @@
+Fix mot so loi liên quan den ham swap, giam do dài cia ran
+Bo swapLength
+Thêm swapControl
+     Stunning (khien cho ran không the bi dieu khien trong 1s)
