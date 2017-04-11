@@ -1,0 +1,3 @@
+Them : Game Menu
+       Sua mot so loi
+	Them pause/ unpause game
