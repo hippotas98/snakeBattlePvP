@@ -10,15 +10,20 @@
 #include "iostream"
 using namespace std;
 
+const int window_w = 800;
+const int window_h = 600;
+const int obstacleNum = 3;
+const int speed = 15;
 SDL_Rect Snake_Box = { 20,80,705,510 };
 SDL_Window *windows;
 SDL_Renderer *renderer;
 TTF_Font *times, *comic;
-const int window_w = 800;
-const int window_h = 600;
+SDL_Event event;
 SDL_Rect Snake1_Rect[100];
 SDL_Rect Snake2_Rect[100];
 SDL_Color white = { 255,255,255 };
+SDL_Rect fruit_rect[2], obstacle1_rect[obstacleNum], obstacle2_rect[obstacleNum];
+uint32_t last;
 typedef struct
 {
 	int x, y;
@@ -26,31 +31,31 @@ typedef struct
 	const int w = 15;
 	const int h = 15;
 }Snake;
-Snake snake1[100];
-Snake snake2[100];
-int snake1Length, Snake1LengthRect;
-int snake2Length, Snake2LengthRect;
-const int speed = 15;
 typedef struct
 {
 	int x, y;
 	const int w = 15;
 	const int h = 15;
 }Fruit;
-Fruit fruit[2];
-SDL_Rect fruit_rect[2];
 typedef struct
 {
 	int x, y;
 }Direction;
+Snake snake1[100];
+Snake snake2[100];
+Fruit fruit[2];
+Fruit Obstacles1[obstacleNum], Obstacles2[obstacleNum];
 Direction dir[4];
 int odir1, odir2, direction1, direction2, winner;
-bool stop, eatfruit;
+int snake1Length, Snake1LengthRect;
+int snake2Length, Snake2LengthRect;
 int fruitbeeaten, level, snakeeatfruit;
 int controller1, controller2;
 bool accelerator1, accelerator2;
-bool swapdirection;
-uint32_t last;
+bool swapdirection1,swapdirection2;
+bool drop1, drop2 , snake1bom, snake2bom;
+bool obstacle1state[obstacleNum], obstacle2state[obstacleNum];
+bool stop, eatfruit;
 
 //Render text, img
 void RenderText(SDL_Surface *sur, SDL_Rect *Rect) {
@@ -236,21 +241,39 @@ void StoptheSnake()
 void swapDirection()
 {
 	last = SDL_GetTicks();
-	if (swapdirection == 1)
+	if (snakeeatfruit == 1)
 	{
-		swapdirection = 0;
+		if (swapdirection1 == 0)
+		{
+			swapdirection1 = 1;
+		}
 	}
+	else if (snakeeatfruit == 2)
+	{
+		if (swapdirection2 == 0)
+		{
+			swapdirection2 = 1;
+		}
+	}
+	
 }
 
 void stopDirection()
 {
-	Uint32 now = SDL_GetTicks();
-	Uint32 delta = now - last;
-	if (delta > 10000)
+	if (swapdirection1 == 1 || swapdirection2 == 1)
 	{
-		if (swapdirection == 0)
+		Uint32 now = SDL_GetTicks();
+		Uint32 delta = now - last;
+		if (delta > 10000)
 		{
-			swapdirection = 1;
+			if (swapdirection1 == 1)
+			{
+				swapdirection1 = 0;
+			}
+			if (swapdirection2 == 1)
+			{
+				swapdirection2 = 0;
+			}
 		}
 	}
 }
@@ -379,7 +402,7 @@ void Controller1Snake1()
 		odir1 = direction1;
 	if (key[SDL_SCANCODE_UP])
 	{
-		if (swapdirection == 1)
+		if (swapdirection1 == 0)
 			direction1 = 0;
 		else
 			direction1 = 2;
@@ -388,7 +411,7 @@ void Controller1Snake1()
 	}
 	else if (key[SDL_SCANCODE_DOWN])
 	{
-		if (swapdirection == 1)
+		if (swapdirection1 == 0)
 			direction1 = 2;
 		else
 			direction1 = 0;
@@ -397,7 +420,7 @@ void Controller1Snake1()
 	}
 	else if (key[SDL_SCANCODE_RIGHT])
 	{
-		if (swapdirection == 1)
+		if (swapdirection1 == 0)
 			direction1 = 1;
 		else
 			direction1 = 3;
@@ -406,7 +429,7 @@ void Controller1Snake1()
 	}
 	else if (key[SDL_SCANCODE_LEFT])
 	{
-		if (swapdirection == 1)
+		if (swapdirection1 == 0)
 			direction1 = 3;
 		else
 			direction1 = 1;
@@ -422,7 +445,7 @@ void Controller2Snake1()
 		odir1 = direction1;
 	if (key[SDL_SCANCODE_W])
 	{
-		if (swapdirection == 1)
+		if (swapdirection1 == 0)
 			direction1 = 0;
 		else
 			direction1 = 2;
@@ -431,7 +454,7 @@ void Controller2Snake1()
 	}
 	else if (key[SDL_SCANCODE_S])
 	{
-		if (swapdirection == 1)
+		if (swapdirection1 == 0)
 			direction1 = 2;
 		else
 			direction1 = 0;
@@ -440,7 +463,7 @@ void Controller2Snake1()
 	}
 	else if (key[SDL_SCANCODE_D])
 	{
-		if (swapdirection == 1)
+		if (swapdirection1 == 0)
 			direction1 = 1;
 		else
 			direction1 = 3;
@@ -449,7 +472,7 @@ void Controller2Snake1()
 	}
 	else if (key[SDL_SCANCODE_A])
 	{
-		if (swapdirection == 1)
+		if (swapdirection1 == 0)
 			direction1 = 3;
 		else
 			direction1 = 1;
@@ -529,7 +552,7 @@ void Controller2Snake2() {
 		odir2 = direction2;
 	if (state[SDL_SCANCODE_W])
 	{
-		if (swapdirection == 1)
+		if (swapdirection2 == 0)
 			direction2 = 0;
 		else
 			direction2 = 2;
@@ -538,7 +561,7 @@ void Controller2Snake2() {
 	}
 	else if (state[SDL_SCANCODE_S])
 	{
-		if (swapdirection == 1)
+		if (swapdirection2 == 0)
 			direction2 = 2;
 		else
 			direction2 = 0;
@@ -547,7 +570,7 @@ void Controller2Snake2() {
 	}
 	else if (state[SDL_SCANCODE_D])
 	{
-		if (swapdirection == 1)
+		if (swapdirection2 == 0)
 			direction2 = 1;
 		else
 			direction2 = 3;
@@ -556,7 +579,7 @@ void Controller2Snake2() {
 	}
 	else if (state[SDL_SCANCODE_A])
 	{
-		if (swapdirection == 1)
+		if (swapdirection2 == 0)
 			direction2 = 3;
 		else
 			direction2 = 1;
@@ -570,7 +593,7 @@ void Controller1Snake2()
 	const Uint8 *state = SDL_GetKeyboardState(NULL);
 	if (state[SDL_SCANCODE_UP])
 	{
-		if (swapdirection == 1)
+		if (swapdirection2==0)
 			direction2 = 0;
 		else
 			direction2 = 2;
@@ -579,7 +602,7 @@ void Controller1Snake2()
 	}
 	else if (state[SDL_SCANCODE_DOWN])
 	{
-		if (swapdirection == 1)
+		if (swapdirection2==0)
 			direction2 = 2;
 		else
 			direction2 = 0;
@@ -588,7 +611,7 @@ void Controller1Snake2()
 	}
 	else if (state[SDL_SCANCODE_RIGHT])
 	{
-		if (swapdirection == 1)
+		if (swapdirection2==0)
 			direction2 = 1;
 		else
 			direction2 = 3;
@@ -597,7 +620,7 @@ void Controller1Snake2()
 	}
 	else if (state[SDL_SCANCODE_LEFT])
 	{
-		if (swapdirection == 1)
+		if (swapdirection2==0)
 			direction2 = 3;
 		else
 			direction2 = 1;
@@ -679,6 +702,128 @@ void MakeFruit()
 		eatfruit = false;
 	}
 }
+// Make obstacle
+void MakeObstacle()
+{
+	if (drop1 == true)
+	{
+		for (int i = 0; i < obstacleNum; ++i)
+		{
+			if (obstacle1state[i] == false)
+			{
+				obstacle1state[i] = true;
+				Obstacles1[i].x = snake1[snake1Length - 1].x;
+				Obstacles1[i].y = snake1[snake1Length - 1].y;
+				drop1 = false;
+				break;
+			}
+		}
+	}
+
+	if (drop2 == true)
+	{
+		for (int i = 0; i < obstacleNum; ++i)
+		{
+			if (obstacle2state[i] == false)
+			{
+				obstacle2state[i] = true;
+				Obstacles2[i].x = snake2[snake2Length - 1].x;
+				Obstacles2[i].y = snake2[snake2Length - 1].y;
+				drop2 = false;
+				break;
+			}
+		}
+	}
+}
+
+void DrawObstacle()
+{
+
+	for (int i = 0; i < obstacleNum; ++i)
+	{
+		if (obstacle1state[i] == true)
+		{
+			obstacle1_rect[i].x = Obstacles1[i].x;
+			obstacle1_rect[i].y = Obstacles1[i].y;
+			obstacle1_rect[i].w = Obstacles1[i].w;
+			obstacle1_rect[i].h = Obstacles1[i].h;
+			SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+			SDL_RenderFillRect(renderer, &obstacle1_rect[i]);
+		}
+		if (obstacle2state[i] == true)
+		{
+			obstacle2_rect[i].x = Obstacles2[i].x;
+			obstacle2_rect[i].y = Obstacles2[i].y;
+			obstacle2_rect[i].w = Obstacles2[i].w;
+			obstacle2_rect[i].h = Obstacles2[i].h;
+			SDL_SetRenderDrawColor(renderer, 225, 0, 0, 225);
+			SDL_RenderFillRect(renderer, &obstacle2_rect[i]);
+		}
+	}
+	SDL_RenderPresent(renderer);
+}
+
+bool Snake1EatObstacle()
+{
+	for (int i = 0; i < obstacleNum; ++i)
+	{
+		if (snake1[0].x == Obstacles2[i].x && snake1[0].y == Obstacles2[i].y && obstacle2state[i] == true)
+		{
+			obstacle2state[i] = false;
+			return true;
+		}	
+		if (snake1[0].x == Obstacles1[i].x && snake1[0].y == Obstacles1[i].y && obstacle1state[i] == true)
+		{
+			obstacle1state[i] = false;
+			winner = 2;
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Snake2EatObstacle()
+{
+	for (int i = 0; i < obstacleNum; ++i)
+	{
+		if (snake2[0].x == Obstacles1[i].x && snake2[0].y == Obstacles1[i].y && obstacle1state[i] == true)
+		{
+			obstacle1state[i] = false;
+			return true;
+		}	
+		if (snake2[0].x == Obstacles2[i].x && snake2[0].y == Obstacles2[i].y && obstacle2state[i] == true)
+		{
+			obstacle2state[i] = false;
+			winner = 1;
+			return true;
+		}
+	}
+	return false;
+}
+
+void Obstacle()
+{
+	if (event.type == SDL_KEYDOWN)
+	{
+		if (event.key.keysym.sym == SDLK_m)
+		{
+			drop1 = true;
+		}
+		else if (event.key.keysym.sym == SDLK_q)
+		{
+			drop2 = true;
+		}
+	}
+	MakeObstacle();
+	if (Snake1EatObstacle())
+	{
+		snake1Length -= 3;
+	}
+	if (Snake2EatObstacle())
+	{
+		snake2Length -= 3;
+	}
+}
 //Draw
 void DrawFruit()
 {
@@ -731,13 +876,14 @@ void SetUp()
 	accelerator2 = 1;
 	odir1 = 1, odir2 = 3;
 	direction1 = 3, direction2 = 1;
-	snake1Length = 5;
-	snake2Length = 5;
+	snake1Length = 10;
+	snake2Length = 10;
 	fruitbeeaten = 0;
 	level += 1;
-	Snake1LengthRect = 20;
-	Snake2LengthRect = 20; // do dai ao, de co kha nang swap do dai
-
+	Snake1LengthRect = 10;
+	Snake2LengthRect = 10; // do dai ao, de co kha nang swap do dai
+	swapdirection1 = 0;
+	swapdirection2 = 0;
 	dir[0].x = 0;
 	dir[0].y = -speed;
 
@@ -752,29 +898,21 @@ void SetUp()
 
 	for (int i = 0; i < Snake1LengthRect; ++i)
 	{
-		if (i >= snake1Length)
-		{
-			snake1[i].ox = Snake_Box.x + 300 + speed*(snake1Length - i);
-			snake1[i].oy = Snake_Box.y + 270;
-		}
-		else
-		{
 			snake1[i].x = Snake_Box.x + 300 + speed*(snake1Length - i);
 			snake1[i].y = Snake_Box.y + 270;
-		}
 	}
 	for (int i = 0; i < Snake2LengthRect; ++i)
 	{
-		if (i >= snake1Length)
-		{
-			snake2[i].ox = Snake_Box.x + speed*i + 15;
-			snake2[i].oy = Snake_Box.y + 30;
-		}
-		else
-		{
 			snake2[i].x = Snake_Box.x + speed*i + 15;
 			snake2[i].y = Snake_Box.y + 30;
-		}
+	}
+
+	drop1 = false; 
+	drop2 = false;
+	for (int i = 0; i < obstacleNum; ++i)
+	{
+		obstacle1state[i] = false;
+		obstacle2state[i] = false;
 	}
 }
 
@@ -826,6 +964,8 @@ int GameMenu() {
 
 	MenuText[0] = SDL_CreateTextureFromSurface(renderer, MenuSur[0]);
 	MenuText[1] = SDL_CreateTextureFromSurface(renderer, MenuSur[1]);
+	SDL_RenderCopy(renderer, MenuText[0], NULL, &MenuRect[0]);
+	SDL_RenderCopy(renderer, MenuText[1], NULL, &MenuRect[1]);
 	SDL_RenderPresent(renderer);
 	SDL_Event menuevent;
 	while (true)
@@ -957,6 +1097,7 @@ void Logic()
 	MakeFruit();
 	SnakeOne();
 	SnakeTwo();
+	Obstacle();
 	if (Snake2Lose() == true)
 	{
 		stop = true;
@@ -980,15 +1121,16 @@ void Logic()
 
 void PrintResult()
 {
+	SDL_Color black = { 0,0,0 };
 	SDL_Rect Result_Rect = { Snake_Box.x + Snake_Box.w / 2 - 200, Snake_Box.y + Snake_Box.h / 2 - 40,400,80 };
 	if (winner == 0)
 	{
-		SDL_Surface *Result = TTF_RenderText_Solid(times, "Player 1 WIN. Congratulation !!", white);
+		SDL_Surface *Result = TTF_RenderText_Solid(times, "Player 1 WIN. Congratulation !!", black);
 		RenderText(Result, &Result_Rect);
 	}
 	else if (winner == 1)
 	{
-		SDL_Surface *Result = TTF_RenderText_Solid(times, "Player 2 WIN. Congratulation !!", white);
+		SDL_Surface *Result = TTF_RenderText_Solid(times, "Player 2 WIN. Congratulation !!", black);
 		RenderText(Result, &Result_Rect);
 	}
 	DrawScore();
@@ -1063,6 +1205,7 @@ void DrawScreen()
 		}
 		DrawScore();
 		DrawFruit();
+		DrawObstacle();
 		SDL_RenderPresent(renderer);
 	}
 	else if (stop == true)
@@ -1085,7 +1228,6 @@ int main(int argv, char ** args)
 {
 	bool running = true;
 	bool stop = false;
-	SDL_Event event;
 	LoadGame();
 	int menu = GameMenu();
 	if (menu == 0)
