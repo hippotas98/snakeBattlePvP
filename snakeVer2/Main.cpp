@@ -10,11 +10,11 @@
 #include "iostream"
 using namespace std;
 
-const int window_w = 800;
-const int window_h = 600;
+const int window_w = 1200;
+const int window_h = 700;
 const int obstacleNum = 3;
-const int speed = 15;
-SDL_Rect Snake_Box = { 20,80,705,510 };
+const int speed = 10;
+SDL_Rect Snake_Box = { 200,50,800,600 };
 SDL_Window *windows;
 SDL_Renderer *renderer;
 TTF_Font *times, *comic;
@@ -28,14 +28,14 @@ typedef struct
 {
 	int x, y;
 	int ox, oy;
-	const int w = 15;
-	const int h = 15;
+	const int w = 10;
+	const int h = 10;
 }Snake;
 typedef struct
 {
 	int x, y;
-	const int w = 15;
-	const int h = 15;
+	const int w = 10;
+	const int h = 10;
 }Fruit;
 typedef struct
 {
@@ -74,13 +74,13 @@ void RenderText(SDL_Surface *sur, SDL_Rect *Rect) {
 void Delay() {
 	switch (level)
 	{
-	case 1: SDL_Delay(30);
+	case 1: SDL_Delay(20);
 		break;
-	case 2: SDL_Delay(25);
+	case 2: SDL_Delay(18);
 		break;
-	case 3: SDL_Delay(20);
+	case 3: SDL_Delay(15);
 		break;
-	case 4: SDL_Delay(15);
+	case 4: SDL_Delay(12);
 		break;
 	case 5: SDL_Delay(10);
 		break;
@@ -398,16 +398,13 @@ void snake1Move(int direction)
 void Controller1Snake1()
 {
 	const Uint8 *key = SDL_GetKeyboardState(NULL);
-	if (Snake1CanMove() == 1)
-		odir1 = direction1;
+		
 	if (key[SDL_SCANCODE_UP])
 	{
 		if (swapdirection1 == 0)
 			direction1 = 0;
 		else
 			direction1 = 2;
-		if (Snake1CanMove() == true)
-			snake1Move(direction1);
 	}
 	else if (key[SDL_SCANCODE_DOWN])
 	{
@@ -415,8 +412,6 @@ void Controller1Snake1()
 			direction1 = 2;
 		else
 			direction1 = 0;
-		if (Snake1CanMove() == true)
-			snake1Move(direction1);
 	}
 	else if (key[SDL_SCANCODE_RIGHT])
 	{
@@ -424,8 +419,6 @@ void Controller1Snake1()
 			direction1 = 1;
 		else
 			direction1 = 3;
-		if (Snake1CanMove() == true)
-			snake1Move(direction1);
 	}
 	else if (key[SDL_SCANCODE_LEFT])
 	{
@@ -433,24 +426,28 @@ void Controller1Snake1()
 			direction1 = 3;
 		else
 			direction1 = 1;
-		if (Snake1CanMove() == true)
-			snake1Move(direction1);
 	}
+	if (Snake1CanMove() == true)
+	{
+		snake1Move(direction1);
+		odir1 = direction1;
+	}
+	else
+	{
+		snake1Move(odir2);
+	}
+
 }
 
 void Controller2Snake1()
 {
 	const Uint8 *key = SDL_GetKeyboardState(NULL);
-	if (Snake1CanMove() == 1)
-		odir1 = direction1;
 	if (key[SDL_SCANCODE_W])
 	{
 		if (swapdirection1 == 0)
 			direction1 = 0;
 		else
 			direction1 = 2;
-		if (Snake1CanMove() == true)
-			snake1Move(direction1);
 	}
 	else if (key[SDL_SCANCODE_S])
 	{
@@ -458,8 +455,6 @@ void Controller2Snake1()
 			direction1 = 2;
 		else
 			direction1 = 0;
-		if (Snake1CanMove() == true)
-			snake1Move(direction1);
 	}
 	else if (key[SDL_SCANCODE_D])
 	{
@@ -467,8 +462,6 @@ void Controller2Snake1()
 			direction1 = 1;
 		else
 			direction1 = 3;
-		if (Snake1CanMove() == true)
-			snake1Move(direction1);
 	}
 	else if (key[SDL_SCANCODE_A])
 	{
@@ -476,8 +469,15 @@ void Controller2Snake1()
 			direction1 = 3;
 		else
 			direction1 = 1;
-		if (Snake1CanMove() == true)
-			snake1Move(direction1);
+	}
+	if (Snake1CanMove() == true)
+	{
+		snake1Move(direction1);
+		odir1 = direction1;
+	}
+	else
+	{
+		snake1Move(odir2);
 	}
 }
 
@@ -548,16 +548,14 @@ void snake2Move(int direction)
 
 void Controller2Snake2() {
 	const Uint8 *state = SDL_GetKeyboardState(NULL);
-	if (Snake2CanMove() == 1)
-		odir2 = direction2;
+	//if (Snake2CanMove() == 1)
+	//	odir2 = direction2;
 	if (state[SDL_SCANCODE_W])
 	{
 		if (swapdirection2 == 0)
 			direction2 = 0;
 		else
 			direction2 = 2;
-		if (Snake2CanMove() == true)
-			snake2Move(direction2);
 	}
 	else if (state[SDL_SCANCODE_S])
 	{
@@ -565,8 +563,6 @@ void Controller2Snake2() {
 			direction2 = 2;
 		else
 			direction2 = 0;
-		if (Snake2CanMove() == true)
-			snake2Move(direction2);
 	}
 	else if (state[SDL_SCANCODE_D])
 	{
@@ -574,8 +570,6 @@ void Controller2Snake2() {
 			direction2 = 1;
 		else
 			direction2 = 3;
-		if (Snake2CanMove() == true)
-			snake2Move(direction2);
 	}
 	else if (state[SDL_SCANCODE_A])
 	{
@@ -583,9 +577,17 @@ void Controller2Snake2() {
 			direction2 = 3;
 		else
 			direction2 = 1;
-		if (Snake2CanMove() == true)
-			snake2Move(direction2);
 	}
+	if (Snake2CanMove() == true)
+	{
+		odir2 = direction2;
+		snake2Move(direction2);
+	}
+	else
+	{
+		snake2Move(odir2);
+	}
+		
 }
 
 void Controller1Snake2()
@@ -597,8 +599,6 @@ void Controller1Snake2()
 			direction2 = 0;
 		else
 			direction2 = 2;
-		if (Snake2CanMove() == true)
-			snake2Move(direction2);
 	}
 	else if (state[SDL_SCANCODE_DOWN])
 	{
@@ -606,8 +606,6 @@ void Controller1Snake2()
 			direction2 = 2;
 		else
 			direction2 = 0;
-		if (Snake2CanMove() == true)
-			snake2Move(direction2);
 	}
 	else if (state[SDL_SCANCODE_RIGHT])
 	{
@@ -615,8 +613,6 @@ void Controller1Snake2()
 			direction2 = 1;
 		else
 			direction2 = 3;
-		if (Snake2CanMove() == true)
-			snake2Move(direction2);
 	}
 	else if (state[SDL_SCANCODE_LEFT])
 	{
@@ -624,8 +620,15 @@ void Controller1Snake2()
 			direction2 = 3;
 		else
 			direction2 = 1;
-		if (Snake2CanMove() == true)
-			snake2Move(direction2);
+	}
+	if (Snake2CanMove() == true)
+	{
+		odir2 = direction2;
+		snake2Move(direction2);
+	}
+	else
+	{
+		snake2Move(odir2);
 	}
 }
 
@@ -687,10 +690,10 @@ void MakeFruit()
 		{
 			for (; ;)
 			{
-				int x = rand() % 45;
-				int y = rand() % 32;
-				fruit[i].x = x * 15 + Snake_Box.x + 15;
-				fruit[i].y = y * 15 + Snake_Box.y + 15;
+				int x = rand() % 79;
+				int y = rand() % 59;
+				fruit[i].x = x * 10 + Snake_Box.x + 10;
+				fruit[i].y = y * 10 + Snake_Box.y + 10;
 				if (CanPlaceFruitHere(i) == true)
 					break;
 			}
@@ -747,8 +750,8 @@ void DrawObstacle()
 			obstacle1_rect[i].y = Obstacles1[i].y;
 			obstacle1_rect[i].w = Obstacles1[i].w;
 			obstacle1_rect[i].h = Obstacles1[i].h;
-			SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-			SDL_RenderFillRect(renderer, &obstacle1_rect[i]);
+			SDL_Surface *bomb_sur = IMG_Load("bomb.png");
+			RenderText(bomb_sur, &obstacle1_rect[i]);
 		}
 		if (obstacle2state[i] == true)
 		{
@@ -756,11 +759,12 @@ void DrawObstacle()
 			obstacle2_rect[i].y = Obstacles2[i].y;
 			obstacle2_rect[i].w = Obstacles2[i].w;
 			obstacle2_rect[i].h = Obstacles2[i].h;
-			SDL_SetRenderDrawColor(renderer, 225, 0, 0, 225);
-			SDL_RenderFillRect(renderer, &obstacle2_rect[i]);
+			SDL_Surface *bomb_sur = IMG_Load("bomb.png");
+			RenderText(bomb_sur, &obstacle1_rect[i]);
 		}
 	}
-	SDL_RenderPresent(renderer);
+
+	
 }
 
 bool Snake1EatObstacle()
@@ -854,16 +858,66 @@ void DrawScore()
 	SDL_Surface *Player2ScoreNum = TTF_RenderText_Solid(times, p2score.str().c_str(), white);
 	SDL_Surface *Player1Text = TTF_RenderText_Solid(times, "Player 1: ", white);
 	SDL_Surface *Player2Text = TTF_RenderText_Solid(times, "Player 2: ", white);
-	SDL_Rect Player1Text_Rect = { 20,5,90,40 };
-	SDL_Rect Player1Num_Rect = { 120,5,30,40 };
-	SDL_Rect Player2Text_Rect = { 600,5,90,40 };
-	SDL_Rect Player2Num_Rect = { 700,5,30,40 };
+	SDL_Rect Player1Text_Rect = { 20,20,95,40 };
+	SDL_Rect Player1Num_Rect = { 120,20,30,40 };
+	SDL_Rect Player2Text_Rect = { 1050,20,95,40 };
+	SDL_Rect Player2Num_Rect = { 1150,20,30,40 };
 	RenderText(Player1Text, &Player1Text_Rect);
 	RenderText(Player2Text, &Player2Text_Rect);
 	RenderText(Player1ScoreNum, &Player1Num_Rect);
 	RenderText(Player2ScoreNum, &Player2Num_Rect);
 }
+//Instructor + Pause
+int Pause() {
+	int input;
+	const SDL_MessageBoxButtonData button[] = {
+		{ 0,0,"Restart" },
+		{ 0,1,"Continue" }
+	};
+	const SDL_MessageBoxColorScheme colorScheme[5] = {
+		{ 255,255,255 }, //background color
+		{ 0,0,0 }, //Text color
+		{ 255,255,0 }, //button color
+		{ 255,255,255 }, //button background
+		{ 0,0,0 } //button text
+	};
+	const SDL_MessageBoxData messageboxdata{
+		SDL_MESSAGEBOX_INFORMATION,
+		NULL,
+		"Pause",
+		"Player 1 use Arrow Key to Move the Snake\nPlayer 2 use A S W D to Move the Snake",
+		2,
+		button,
+		&colorScheme[5],
+	};
+	if (SDL_ShowMessageBox(&messageboxdata, &input) < 0) {
+		SDL_Log("error displaying message box");
+		return -1;
+	}
+	return input;
+}
 
+void DrawPauseButton()
+{
+	SDL_Surface *pause_button = IMG_Load("pause.png");
+	SDL_Rect pause_img = { window_w / 2 - 25,0,50,50 };
+	RenderText(pause_button, &pause_img);
+}
+
+bool SelectPause()
+{
+	if (event.type == SDL_MOUSEBUTTONDOWN)
+	{
+		int x = event.motion.x;
+		int y = event.motion.y;
+		if (x > window_w / 2 - 25 && x < window_w / 2 + 25 && y > 0 && y < 50)
+		{ 
+			return true;
+		}
+	}
+	return false;
+}
+/////
 void SetUp()
 {
 	stop = false;
@@ -875,7 +929,7 @@ void SetUp()
 	accelerator1 = 1;
 	accelerator2 = 1;
 	odir1 = 1, odir2 = 3;
-	direction1 = 3, direction2 = 1;
+	direction1 = 1, direction2 = 3;
 	snake1Length = 10;
 	snake2Length = 10;
 	fruitbeeaten = 0;
@@ -898,13 +952,13 @@ void SetUp()
 
 	for (int i = 0; i < Snake1LengthRect; ++i)
 	{
-			snake1[i].x = Snake_Box.x + 300 + speed*(snake1Length - i);
-			snake1[i].y = Snake_Box.y + 270;
+			snake1[i].x = Snake_Box.x + 600 + speed*(snake1Length - i);
+			snake1[i].y = Snake_Box.y + 500;
 	}
 	for (int i = 0; i < Snake2LengthRect; ++i)
 	{
-			snake2[i].x = Snake_Box.x + speed*i + 15;
-			snake2[i].y = Snake_Box.y + 30;
+			snake2[i].x = Snake_Box.x + speed*i + 10;
+			snake2[i].y = Snake_Box.y + 50;
 	}
 
 	drop1 = false; 
@@ -924,7 +978,7 @@ int GameMenu() {
 	SDL_Surface *MenuSur[NumofMenu];
 	SDL_Texture *MenuText[NumofMenu];
 	SDL_Rect MenuRect[NumofMenu];
-	SDL_Rect Screen = { 0,0,800,600 };
+	SDL_Rect Screen = { 0,0,window_w, window_h };
 	SDL_Surface *Background;
 	SDL_Color red = { 255,0,0 };
 	bool Selected[NumofMenu];
@@ -933,15 +987,15 @@ int GameMenu() {
 		Selected[i] = 0;
 	}
 
-	MenuRect[0].x = 350;
-	MenuRect[1].x = 360;
-	MenuRect[0].y = 320;
-	MenuRect[1].y = 400;
+	MenuRect[0].x = window_w / 2 - 50;
+	MenuRect[1].x = window_w / 2 - 40;
+	MenuRect[0].y = window_h / 2 + 20;
+	MenuRect[1].y = window_h / 2 + 120;
 
-	MenuRect[0].h = 60;
-	MenuRect[1].h = 60;
-	MenuRect[0].w = 100;
-	MenuRect[1].w = 80;
+	MenuRect[0].h = 80;
+	MenuRect[1].h = 80;
+	MenuRect[0].w = 120;
+	MenuRect[1].w = 100;
 
 	MenuSur[0] = TTF_RenderText_Solid(times, Menu[0], white);
 	MenuSur[1] = TTF_RenderText_Solid(times, Menu[1], white);
@@ -954,7 +1008,7 @@ int GameMenu() {
 	}
 	RenderText(Background, &Screen);
 
-	SDL_Rect nameRect = { window_w / 2 - 200,150,400,150 };
+	SDL_Rect nameRect = { window_w / 2 - 375,100,750,300 };
 	SDL_Surface *nameSurface = TTF_RenderText_Solid(comic, "SNAKE BATTLE", white);
 	if (nameSurface == NULL)
 	{
@@ -1054,7 +1108,7 @@ void LoadGame()
 	renderer = SDL_CreateRenderer(windows, -1, SDL_RENDERER_ACCELERATED);
 	SetUp();
 
-	times = TTF_OpenFont("times.ttf", 30);
+	times = TTF_OpenFont("times.ttf", 50);
 	if (times == NULL)
 	{
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "ERRR", SDL_GetError(), windows);
@@ -1122,7 +1176,8 @@ void Logic()
 void PrintResult()
 {
 	SDL_Color black = { 0,0,0 };
-	SDL_Rect Result_Rect = { Snake_Box.x + Snake_Box.w / 2 - 200, Snake_Box.y + Snake_Box.h / 2 - 40,400,80 };
+	SDL_Rect Result_Rect = { Snake_Box.x + Snake_Box.w / 2 - 350, Snake_Box.y + Snake_Box.h / 2 - 40,700,80 };
+	SDL_Rect Continue_Rect = { Snake_Box.x + Snake_Box.w/2 - 200, Snake_Box.y + Snake_Box.h  - 50,400,20 };
 	if (winner == 0)
 	{
 		SDL_Surface *Result = TTF_RenderText_Solid(times, "Player 1 WIN. Congratulation !!", black);
@@ -1133,6 +1188,8 @@ void PrintResult()
 		SDL_Surface *Result = TTF_RenderText_Solid(times, "Player 2 WIN. Congratulation !!", black);
 		RenderText(Result, &Result_Rect);
 	}
+	SDL_Surface *continue_surface = TTF_RenderText_Solid(comic, "Press Space to continue",black);
+	RenderText(continue_surface, &Continue_Rect);
 	DrawScore();
 	SDL_RenderPresent(renderer);
 }
@@ -1188,11 +1245,11 @@ void DrawScreen()
 		{
 			if (i == 0)
 			{
-				SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+				SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 			}
 			else
 			{
-				SDL_SetRenderDrawColor(renderer, 0, 130, 130, 255);
+				SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
 			}
 			if (snake2[i].x != 0 && snake2[i].y != 0)
 			{
@@ -1206,6 +1263,7 @@ void DrawScreen()
 		DrawScore();
 		DrawFruit();
 		DrawObstacle();
+		DrawPauseButton();
 		SDL_RenderPresent(renderer);
 	}
 	else if (stop == true)
@@ -1219,6 +1277,8 @@ void Quit()
 {
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(windows);
+	TTF_CloseFont(comic);
+	TTF_CloseFont(times);
 	SDL_Quit();
 	TTF_Quit();
 	IMG_Quit();
@@ -1255,6 +1315,23 @@ int main(int argv, char ** args)
 						stop = false;
 				}
 			}
+			if (stop == false)
+			{
+				if (SelectPause() == true)
+				{
+					stop = true;
+					if (Pause() == 1)
+					{
+						stop = false;
+					}
+					else 
+					{
+						stop = false;
+						SetUp();
+					}
+				}
+			}
+
 			if (stop == false) 
 			{
 				Logic();
