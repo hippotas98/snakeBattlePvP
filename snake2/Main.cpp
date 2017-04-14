@@ -408,91 +408,73 @@ void snake1Move(int direction)
 	}
 }
 
+
 void Controller1Snake1()
 {
 	const Uint8 *key = SDL_GetKeyboardState(NULL);
-
+	if (Snake1CanMove() == 1)
+		odir1 = direction1;
 	if (key[SDL_SCANCODE_UP])
 	{
-		if (swapdirection1 == 0)
-			direction1 = 0;
-		else
-			direction1 = 2;
+		direction1 = 0;
+		if (Snake1CanMove() == true)
+			snake1Move(direction1);
 	}
 	else if (key[SDL_SCANCODE_DOWN])
 	{
-		if (swapdirection1 == 0)
-			direction1 = 2;
-		else
-			direction1 = 0;
+		direction1 = 2;
+		if (Snake1CanMove() == true)
+			snake1Move(direction1);
 	}
 	else if (key[SDL_SCANCODE_RIGHT])
 	{
-		if (swapdirection1 == 0)
-			direction1 = 1;
-		else
-			direction1 = 3;
+		direction1 = 1;
+		if (Snake1CanMove() == true)
+			snake1Move(direction1);
 	}
 	else if (key[SDL_SCANCODE_LEFT])
 	{
-		if (swapdirection1 == 0)
-			direction1 = 3;
-		else
-			direction1 = 1;
-	}
-	if (Snake1CanMove() == true)
-	{
-		snake1Move(direction1);
-		odir1 = direction1;
+		direction1 = 3;
+		if (Snake1CanMove() == true)
+			snake1Move(direction1);
 	}
 	else
-	{
-		snake1Move(odir2);
-	}
-
+	snake1Move(odir1);
 }
 
 void Controller2Snake1()
 {
-	const Uint8 *key = SDL_GetKeyboardState(NULL);
-	if (key[SDL_SCANCODE_W])
-	{
-		if (swapdirection1 == 0)
-			direction1 = 0;
-		else
-			direction1 = 2;
-	}
-	else if (key[SDL_SCANCODE_S])
-	{
-		if (swapdirection1 == 0)
-			direction1 = 2;
-		else
-			direction1 = 0;
-	}
-	else if (key[SDL_SCANCODE_D])
-	{
-		if (swapdirection1 == 0)
-			direction1 = 1;
-		else
-			direction1 = 3;
-	}
-	else if (key[SDL_SCANCODE_A])
-	{
-		if (swapdirection1 == 0)
-			direction1 = 3;
-		else
-			direction1 = 1;
-	}
-	if (Snake1CanMove() == true)
-	{
-		snake1Move(direction1);
+	const Uint8 *state = SDL_GetKeyboardState(NULL);
+	if (Snake1CanMove() == 1)
 		odir1 = direction1;
+	if (state[SDL_SCANCODE_W])
+	{
+		direction1 = 0;
+		if (Snake1CanMove() == true)
+			snake1Move(direction1);
+	}
+	else if (state[SDL_SCANCODE_S])
+	{
+		direction1 = 2;
+		if (Snake1CanMove() == true)
+			snake1Move(direction1);
+	}
+	else if (state[SDL_SCANCODE_D])
+	{
+		direction1 = 1;
+		if (Snake1CanMove() == true)
+			snake1Move(direction1);
+	}
+	else if (state[SDL_SCANCODE_A])
+	{
+		direction1 = 3;
+		if (Snake1CanMove() == true)
+			snake1Move(direction1);
 	}
 	else
-	{
-		snake1Move(odir2);
-	}
+	snake1Move(odir1);
 }
+
 
 void snake1Control()
 {
@@ -561,88 +543,67 @@ void snake2Move(int direction)
 
 void Controller2Snake2() {
 	const Uint8 *state = SDL_GetKeyboardState(NULL);
-	//if (Snake2CanMove() == 1)
-	//	odir2 = direction2;
+	if (Snake2CanMove() == 1)
+		odir2 = direction2;
 	if (state[SDL_SCANCODE_W])
 	{
-		if (swapdirection2 == 0)
-			direction2 = 0;
-		else
-			direction2 = 2;
+		direction2 = 0;
+		if (Snake2CanMove() == true)
+			snake2Move(direction2);
 	}
 	else if (state[SDL_SCANCODE_S])
 	{
-		if (swapdirection2 == 0)
-			direction2 = 2;
-		else
-			direction2 = 0;
+		direction2 = 2;
+		if (Snake2CanMove() == true)
+			snake2Move(direction2);
 	}
 	else if (state[SDL_SCANCODE_D])
 	{
-		if (swapdirection2 == 0)
-			direction2 = 1;
-		else
-			direction2 = 3;
+		direction2 = 1;
+		if (Snake2CanMove() == true)
+			snake2Move(direction2);
 	}
 	else if (state[SDL_SCANCODE_A])
 	{
-		if (swapdirection2 == 0)
-			direction2 = 3;
-		else
-			direction2 = 1;
-	}
-	if (Snake2CanMove() == true)
-	{
-		odir2 = direction2;
-		snake2Move(direction2);
+		direction2 = 3;
+		if (Snake2CanMove() == true)
+			snake2Move(direction2);
 	}
 	else
-	{
-		snake2Move(odir2);
-	}
-
+	snake2Move(odir2);
 }
 
 void Controller1Snake2()
 {
-	const Uint8 *state = SDL_GetKeyboardState(NULL);
-	if (state[SDL_SCANCODE_UP])
-	{
-		if (swapdirection2 == 0)
-			direction2 = 0;
-		else
-			direction2 = 2;
-	}
-	else if (state[SDL_SCANCODE_DOWN])
-	{
-		if (swapdirection2 == 0)
-			direction2 = 2;
-		else
-			direction2 = 0;
-	}
-	else if (state[SDL_SCANCODE_RIGHT])
-	{
-		if (swapdirection2 == 0)
-			direction2 = 1;
-		else
-			direction2 = 3;
-	}
-	else if (state[SDL_SCANCODE_LEFT])
-	{
-		if (swapdirection2 == 0)
-			direction2 = 3;
-		else
-			direction2 = 1;
-	}
-	if (Snake2CanMove() == true)
-	{
+	const Uint8 *key = SDL_GetKeyboardState(NULL);
+	if (Snake2CanMove() == 1)
 		odir2 = direction2;
-		snake2Move(direction2);
+	if (key[SDL_SCANCODE_UP])
+	{
+		direction2 = 0;
+		if (Snake2CanMove() == true)
+			snake2Move(direction2);
+	}
+	else if (key[SDL_SCANCODE_DOWN])
+	{
+		direction2 = 2;
+		if (Snake2CanMove() == true)
+			snake2Move(direction2);
+	}
+	else if (key[SDL_SCANCODE_RIGHT])
+	{
+		direction2 = 1;
+		if (Snake2CanMove() == true)
+			snake2Move(direction2);
+	}
+	else if (key[SDL_SCANCODE_LEFT])
+	{
+		direction2 = 3;
+		if (Snake2CanMove() == true)
+			snake2Move(direction2);
 	}
 	else
-	{
-		snake2Move(odir2);
-	}
+	snake2Move(odir2);
 }
 
 void snake2Control()
@@ -728,8 +689,8 @@ void MakeObstacle()
 			if (obstacle1state[i] == false)
 			{
 				obstacle1state[i] = true;
-				Obstacles1[i].x = snake1[snake1Length - 1].x;
-				Obstacles1[i].y = snake1[snake1Length - 1].y;
+				Obstacles1[i].x = snake1[snake1Length - 1].ox;
+				Obstacles1[i].y = snake1[snake1Length - 1].oy;
 				drop1 = false;
 				break;
 			}
@@ -939,7 +900,7 @@ void SetUp()
 	accelerator1 = 1;
 	accelerator2 = 1;
 	odir1 = 1, odir2 = 3;
-	direction1 = 1, direction2 = 3;
+	direction1 = 3, direction2 = 1;
 	snake1Length = 10;
 	snake2Length = 10;
 	fruitbeeaten = 0;
