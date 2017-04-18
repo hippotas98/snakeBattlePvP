@@ -24,6 +24,7 @@ SDL_Rect Snake2_Rect[100];
 SDL_Color white = { 255,255,255 };
 SDL_Rect fruit_rect[2], obstacle1_rect[obstacleNum], obstacle2_rect[obstacleNum];
 uint32_t last;
+uint32_t previous;
 typedef struct
 {
 	int x, y;
@@ -159,13 +160,27 @@ void DecreaseLengthByTwo()
 	DecreaseLengthbyN(2);
 }
 
-void swapControl()
+void swapLength()
 {
-	controller1 = 2 / controller1;
-	controller2 = 2 / controller2;
-	int temp = snake1Length;
-	snake1Length = snake2Length;
-	snake2Length = temp;
+	int different = abs(snake1Length - snake2Length);
+	if (snake1Length > snake2Length)
+	{
+		snake1Length -= different;
+		if (snakeeatfruit == 1)
+		{
+			snakeeatfruit = 2;
+		}
+		increaseLengthbyN(different);
+	}
+	else if (snake2Length > snake1Length)
+	{
+		snake2Length -= different;
+		if (snakeeatfruit == 2)
+		{
+			snakeeatfruit = 1;
+		}
+		increaseLengthbyN(different);
+	}
 }
 
 void Backto5()
@@ -240,19 +255,19 @@ void StoptheSnake()
 
 void swapDirection()
 {
-	last = SDL_GetTicks();
+	previous = SDL_GetTicks();
 	if (snakeeatfruit == 1)
-	{
-		if (swapdirection1 == 0)
-		{
-			swapdirection1 = 1;
-		}
-	}
-	else if (snakeeatfruit == 2)
 	{
 		if (swapdirection2 == 0)
 		{
 			swapdirection2 = 1;
+		}
+	}
+	else if (snakeeatfruit == 2)
+	{
+		if (swapdirection1 == 0)
+		{
+			swapdirection1 = 1;
 		}
 	}
 
@@ -263,7 +278,7 @@ void stopDirection()
 	if (swapdirection1 == 1 || swapdirection2 == 1)
 	{
 		Uint32 now = SDL_GetTicks();
-		Uint32 delta = now - last;
+		Uint32 delta = now - previous;
 		if (delta > 10000)
 		{
 			if (swapdirection1 == 1)
@@ -291,7 +306,7 @@ void IncreaseLength()
 		break;
 	case 3: DoubleLength();
 		break;
-	case 4: swapControl();
+	case 4: swapLength();
 		break;
 	case 5:swapDirection();
 		break;
@@ -311,7 +326,7 @@ void DecreaseLength()
 		break;
 	case 4: HalvetheLengh();
 		break;
-	case 6: swapControl();
+	case 6: swapLength();
 		break;
 	case 7:Stunning();
 		break;
@@ -384,108 +399,67 @@ bool Snake1CanMove() {
 
 void snake1Move(int direction)
 {
-	if (accelerator1 == 1)
+	for (int i = 0; i < Snake1LengthRect; ++i)
 	{
-		for (int i = 0; i < Snake1LengthRect; ++i)
+		if (i == 0)
 		{
-			if (i == 0)
-			{
-				snake1[i].ox = snake1[i].x;
-				snake1[i].oy = snake1[i].y;
-				snake1[i].x += dir[direction].x;
-				snake1[i].y += dir[direction].y;
-			}
-			else
-			{
-				snake1[i].ox = snake1[i].x;
-				snake1[i].oy = snake1[i].y;
-				snake1[i].x = snake1[i - 1].ox;
-				snake1[i].y = snake1[i - 1].oy;
-			}
-
+			snake1[i].ox = snake1[i].x;
+			snake1[i].oy = snake1[i].y;
+			snake1[i].x += dir[direction].x;
+			snake1[i].y += dir[direction].y;
 		}
-		Delay();
+		else
+		{
+			snake1[i].ox = snake1[i].x;
+			snake1[i].oy = snake1[i].y;
+			snake1[i].x = snake1[i - 1].ox;
+			snake1[i].y = snake1[i - 1].oy;
+		}
+
 	}
+	Delay();
+
 }
 
-
-void Controller1Snake1()
+void snake1Control()
 {
 	const Uint8 *key = SDL_GetKeyboardState(NULL);
 	if (Snake1CanMove() == 1)
 		odir1 = direction1;
 	if (key[SDL_SCANCODE_UP])
 	{
+		if(swapdirection1 == 0)
 		direction1 = 0;
+		else direction1 = 2;
 		if (Snake1CanMove() == true)
 			snake1Move(direction1);
 	}
 	else if (key[SDL_SCANCODE_DOWN])
 	{
-		direction1 = 2;
+		if (swapdirection1 == 0)
+			direction1 = 2;
+		else direction1 = 0;
 		if (Snake1CanMove() == true)
 			snake1Move(direction1);
 	}
 	else if (key[SDL_SCANCODE_RIGHT])
 	{
-		direction1 = 1;
+		if (swapdirection1 == 0)
+			direction1 = 1;
+		else direction1 = 3;
 		if (Snake1CanMove() == true)
 			snake1Move(direction1);
 	}
 	else if (key[SDL_SCANCODE_LEFT])
 	{
+		if (swapdirection1 == 0)
 		direction1 = 3;
+		else direction1 = 1;
 		if (Snake1CanMove() == true)
 			snake1Move(direction1);
 	}
 	else
-	snake1Move(odir1);
-}
-
-void Controller2Snake1()
-{
-	const Uint8 *state = SDL_GetKeyboardState(NULL);
-	if (Snake1CanMove() == 1)
-		odir1 = direction1;
-	if (state[SDL_SCANCODE_W])
-	{
-		direction1 = 0;
-		if (Snake1CanMove() == true)
-			snake1Move(direction1);
-	}
-	else if (state[SDL_SCANCODE_S])
-	{
-		direction1 = 2;
-		if (Snake1CanMove() == true)
-			snake1Move(direction1);
-	}
-	else if (state[SDL_SCANCODE_D])
-	{
-		direction1 = 1;
-		if (Snake1CanMove() == true)
-			snake1Move(direction1);
-	}
-	else if (state[SDL_SCANCODE_A])
-	{
-		direction1 = 3;
-		if (Snake1CanMove() == true)
-			snake1Move(direction1);
-	}
-	else
-	snake1Move(odir1);
-}
-
-
-void snake1Control()
-{
-	if (controller1 == 1)
-	{
-		Controller1Snake1();
-	}
-	else if (controller1 == 2)
-	{
-		Controller2Snake1();
-	}
+		snake1Move(odir1);
 }
 
 void snake1Wall()
@@ -541,81 +515,46 @@ void snake2Move(int direction)
 	}
 }
 
-void Controller2Snake2() {
+void snake2Control()
+{
 	const Uint8 *state = SDL_GetKeyboardState(NULL);
 	if (Snake2CanMove() == 1)
 		odir2 = direction2;
 	if (state[SDL_SCANCODE_W])
 	{
-		direction2 = 0;
+		if (swapdirection2 == 0)
+			direction2 = 0;
+		else
+			direction2 = 2;
 		if (Snake2CanMove() == true)
 			snake2Move(direction2);
 	}
 	else if (state[SDL_SCANCODE_S])
 	{
+		if (swapdirection2 == 0)
 		direction2 = 2;
+		else direction2 = 0;
 		if (Snake2CanMove() == true)
 			snake2Move(direction2);
 	}
 	else if (state[SDL_SCANCODE_D])
 	{
+		if (swapdirection2 == 0)
 		direction2 = 1;
+		else direction2 = 3;
 		if (Snake2CanMove() == true)
 			snake2Move(direction2);
 	}
 	else if (state[SDL_SCANCODE_A])
 	{
+		if (swapdirection2 == 0)
 		direction2 = 3;
+		else direction2 = 1;
 		if (Snake2CanMove() == true)
 			snake2Move(direction2);
 	}
 	else
-	snake2Move(odir2);
-}
-
-void Controller1Snake2()
-{
-	const Uint8 *key = SDL_GetKeyboardState(NULL);
-	if (Snake2CanMove() == 1)
-		odir2 = direction2;
-	if (key[SDL_SCANCODE_UP])
-	{
-		direction2 = 0;
-		if (Snake2CanMove() == true)
-			snake2Move(direction2);
-	}
-	else if (key[SDL_SCANCODE_DOWN])
-	{
-		direction2 = 2;
-		if (Snake2CanMove() == true)
-			snake2Move(direction2);
-	}
-	else if (key[SDL_SCANCODE_RIGHT])
-	{
-		direction2 = 1;
-		if (Snake2CanMove() == true)
-			snake2Move(direction2);
-	}
-	else if (key[SDL_SCANCODE_LEFT])
-	{
-		direction2 = 3;
-		if (Snake2CanMove() == true)
-			snake2Move(direction2);
-	}
-	else
-	snake2Move(odir2);
-}
-
-void snake2Control()
-{
-	if (controller2 == 2)
-	{
-		Controller2Snake2();
-	}
-	else if (controller2 == 1)
-	{
-		Controller1Snake2();
-	}
+		snake2Move(odir2);
 }
 
 void snake2Wall()
@@ -829,10 +768,10 @@ void DrawScore()
 	SDL_Surface *Player2ScoreNum = TTF_RenderText_Solid(times, p2score.str().c_str(), white);
 	SDL_Surface *Player1Text = TTF_RenderText_Solid(times, "Player 1: ", white);
 	SDL_Surface *Player2Text = TTF_RenderText_Solid(times, "Player 2: ", white);
-	SDL_Rect Player1Text_Rect = { 20,20,95,40 };
-	SDL_Rect Player1Num_Rect = { 120,20,30,40 };
-	SDL_Rect Player2Text_Rect = { 1050,20,95,40 };
-	SDL_Rect Player2Num_Rect = { 1150,20,30,40 };
+	SDL_Rect Player2Text_Rect = { 20,20,95,40 };
+	SDL_Rect Player2Num_Rect = { 120,20,30,40 };
+	SDL_Rect Player1Text_Rect = { 1050,20,95,40 };
+	SDL_Rect Player1Num_Rect = { 1150,20,30,40 };
 	RenderText(Player1Text, &Player1Text_Rect);
 	RenderText(Player2Text, &Player2Text_Rect);
 	RenderText(Player1ScoreNum, &Player1Num_Rect);
@@ -870,9 +809,17 @@ int Pause() {
 
 void DrawPauseButton()
 {
-	SDL_Surface *pause_button = IMG_Load("pause.png");
-	SDL_Rect pause_img = { window_w / 2 - 25,0,50,50 };
-	RenderText(pause_button, &pause_img);
+	SDL_Surface *button = NULL;
+	SDL_Surface *play_button = NULL;
+	if (pause == false)
+		button = IMG_Load("pause.png");
+	else
+		button = IMG_Load("play.png");
+	if (button == NULL)
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Err", SDL_GetError(), windows);
+	SDL_Rect button_img = { window_w / 2 - 25,0,50,50 };
+	RenderText(button, &button_img);
+	SDL_RenderPresent(renderer);
 }
 
 bool SelectPause()
@@ -891,25 +838,29 @@ bool SelectPause()
 /////
 void SetUp()
 {
+	//set up
 	stop = false;
 	winner = 3;
 	eatfruit = true;
+	pause = false;
 	snakeeatfruit = 3;
 	controller1 = 1;
 	controller2 = 2;
-	accelerator1 = 1;
-	accelerator2 = 1;
+	//huong dieu khien
 	odir1 = 1, odir2 = 3;
 	direction1 = 3, direction2 = 1;
-	snake1Length = 10;
-	snake2Length = 10;
+	//tang do kho
 	fruitbeeaten = 0;
 	level += 1;
+	//Do dai
+	snake1Length = 10;
+	snake2Length = 10;
 	Snake1LengthRect = 10;
 	Snake2LengthRect = 10; // do dai ao, de co kha nang swap do dai
+	//dao di chuyen
 	swapdirection1 = 0;
 	swapdirection2 = 0;
-	pause = false;
+	//dieu chinh huong
 	dir[0].x = 0;
 	dir[0].y = -speed;
 
@@ -921,7 +872,7 @@ void SetUp()
 
 	dir[3].x = -speed;
 	dir[3].y = 0;
-
+	//ve ran
 	for (int i = 0; i < Snake1LengthRect; ++i)
 	{
 		snake1[i].x = Snake_Box.x + 600 + speed*(snake1Length - i);
@@ -932,7 +883,7 @@ void SetUp()
 		snake2[i].x = Snake_Box.x + speed*i + 10;
 		snake2[i].y = Snake_Box.y + 50;
 	}
-
+	//bomb
 	drop1 = false;
 	drop2 = false;
 	for (int i = 0; i < obstacleNum; ++i)
@@ -1234,19 +1185,50 @@ void DrawScreen()
 	DrawScore();
 	DrawFruit();
 	DrawObstacle();
-	DrawPauseButton();
-	if (stop == true)
+	if (stop == false)
+		DrawPauseButton();
+	if (stop == true) //stop cho logic, pause cho render
 	{
 		pause = true;
 		PrintResult();
 		ContinueGame();
 	}
 	SDL_RenderPresent(renderer);
-	if (stop == true)
+}
+
+void Event(bool running)
+{
+	if (event.type == SDL_KEYDOWN)
 	{
-		pause = true;
-		PrintResult();
-		ContinueGame();
+		if (event.key.keysym.sym == SDLK_ESCAPE)
+		{
+			running = false;
+			Quit();
+		}
+		if (event.key.keysym.sym == SDLK_p)
+		{
+			if (!pause)
+				pause = true;
+			else if (pause)
+				pause = false;
+		}
+	}
+	if (pause == false)
+	{
+		if (SelectPause() == true)
+		{
+			pause = true;
+			DrawPauseButton();
+			if (Pause() == 1)
+			{
+				pause = false;
+			}
+			else
+			{
+				pause = false;
+				SetUp();
+			}
+		}
 	}
 }
 
@@ -1276,38 +1258,7 @@ int main(int argv, char ** args)
 				running = false;
 				Quit();
 			}
-			else if (event.type == SDL_KEYDOWN)
-			{
-				if (event.key.keysym.sym == SDLK_ESCAPE)
-				{
-					running = false;
-					Quit();
-				}
-				if (event.key.keysym.sym == SDLK_p)
-				{
-					if (!pause)
-						pause = true;
-					else if (pause)
-						pause = false;
-				}
-			}
-			if (pause == false)
-			{
-				if (SelectPause() == true)
-				{
-					pause = true;
-					if (Pause() == 1)
-					{
-						pause = false;
-					}
-					else
-					{
-						pause = false;
-						SetUp();
-					}
-				}
-			}
-
+			Event(running);
 			if (pause == false)
 			{
 				Logic();
