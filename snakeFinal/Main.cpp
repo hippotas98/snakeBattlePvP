@@ -12,8 +12,8 @@ using namespace std;
 
 const int window_w = 1200;
 const int window_h = 700;
-const int obstacleNum = 5;
-const int speed = 10;
+const int obstacleNum = 20;
+const int speed = 20;
 SDL_Rect Snake_Box = { 200,50,800,600 };
 SDL_Window *windows;
 SDL_Renderer *renderer;
@@ -21,6 +21,14 @@ TTF_Font *times, *comic;
 SDL_Event event;
 SDL_Rect Snake1_Rect[100];
 SDL_Rect Snake2_Rect[100];
+SDL_Surface *snake1_sur[60];
+SDL_Surface *snake2_sur[60];
+SDL_Texture *snake1_txt[60];
+SDL_Texture *snake2_txt[60];
+SDL_Surface *Snake_sur;
+SDL_Texture *Snake_txt;
+SDL_Surface *bomb_sur;
+SDL_Surface *fruit_sur[2];
 SDL_Color white = { 255,255,255 };
 SDL_Rect fruit_rect[2], obstacle1_rect[obstacleNum], obstacle2_rect[obstacleNum];
 uint32_t last;
@@ -29,14 +37,15 @@ typedef struct
 {
 	int x, y;
 	int ox, oy;
-	const int w = 10;
-	const int h = 10;
+	int img, previmg;
+	const int w = 20;
+	const int h = 20;
 }Snake;
 typedef struct
 {
 	int x, y;
-	const int w = 10;
-	const int h = 10;
+	const int w = 20;
+	const int h = 20;
 }Fruit;
 typedef struct
 {
@@ -77,13 +86,13 @@ void Delay() {
 	{
 	case 1: SDL_Delay(20);
 		break;
-	case 2: SDL_Delay(18);
+	case 2: SDL_Delay(16);
 		break;
-	case 3: SDL_Delay(15);
+	case 3: SDL_Delay(14);
 		break;
 	case 4: SDL_Delay(12);
 		break;
-	case 5: SDL_Delay(10);
+	case 5: SDL_Delay(9);
 		break;
 	}
 }
@@ -96,6 +105,7 @@ void increaseLengthbyN(int n)
 		{
 			snake1[snake1Length].x = snake1[snake1Length - 1].ox;
 			snake1[snake1Length].y = snake1[snake1Length - 1].oy;
+			snake1[snake1Length].img = snake1[snake1Length - 1].previmg;
 			snake1Length += 1;
 			Snake1LengthRect += 1;
 		}
@@ -103,6 +113,7 @@ void increaseLengthbyN(int n)
 		{
 			snake2[snake2Length].x = snake2[snake2Length - 1].ox;
 			snake2[snake2Length].y = snake2[snake2Length - 1].oy;
+			snake2[snake2Length].img = snake2[snake2Length - 1].previmg;
 			snake2Length += 1;
 			Snake2LengthRect += 1;
 		}
@@ -133,21 +144,6 @@ void IncreaseLengthbyOne()
 void IncreaseLengthbyTwo()
 {
 	increaseLengthbyN(2);
-}
-
-void DoubleLength()
-{
-	if (snakeeatfruit == 1)
-	{
-		increaseLengthbyN(snake1Length);
-		snakeeatfruit = 3;
-	}
-	else if (snakeeatfruit == 2)
-	{
-		increaseLengthbyN(snake2Length);
-		snakeeatfruit = 3;
-	}
-
 }
 
 void DecreaseLengthbyOne()
@@ -304,7 +300,7 @@ void IncreaseLength()
 		break;
 	case 2: IncreaseLengthbyTwo();
 		break;
-	case 3: DoubleLength();
+	case 3: IncreaseLengthbyTwo();
 		break;
 	case 4: swapLength();
 		break;
@@ -378,14 +374,12 @@ void SnakeEatFruit()
 		{
 			eatfruit = true;
 			snakeeatfruit = 1;
-			fruitbeeaten += 1;
 			IncreaseLength();
 		}
 		if (snake2[0].x == fruit[i].x && snake2[0].y == fruit[i].y)
 		{
 			eatfruit = true;
 			snakeeatfruit = 2;
-			fruitbeeaten += 1;
 			IncreaseLength();
 		}
 	}
@@ -407,6 +401,8 @@ void snake1Move(int direction)
 			snake1[i].oy = snake1[i].y;
 			snake1[i].x += dir[direction].x;
 			snake1[i].y += dir[direction].y;
+			snake1[i].previmg = snake1[i].img;
+			snake1[i].img = direction;
 		}
 		else
 		{
@@ -414,6 +410,8 @@ void snake1Move(int direction)
 			snake1[i].oy = snake1[i].y;
 			snake1[i].x = snake1[i - 1].ox;
 			snake1[i].y = snake1[i - 1].oy;
+			snake1[i].previmg = snake1[i].img;
+			snake1[i].img = snake1[i - 1].previmg;
 		}
 
 	}
@@ -431,35 +429,33 @@ void snake1Control()
 		if(swapdirection1 == 0)
 		direction1 = 0;
 		else direction1 = 2;
-		if (Snake1CanMove() == true)
-			snake1Move(direction1);
 	}
 	else if (key[SDL_SCANCODE_DOWN])
 	{
 		if (swapdirection1 == 0)
 			direction1 = 2;
 		else direction1 = 0;
-		if (Snake1CanMove() == true)
-			snake1Move(direction1);
 	}
 	else if (key[SDL_SCANCODE_RIGHT])
 	{
 		if (swapdirection1 == 0)
 			direction1 = 1;
 		else direction1 = 3;
-		if (Snake1CanMove() == true)
-			snake1Move(direction1);
 	}
 	else if (key[SDL_SCANCODE_LEFT])
 	{
 		if (swapdirection1 == 0)
 		direction1 = 3;
 		else direction1 = 1;
-		if (Snake1CanMove() == true)
-			snake1Move(direction1);
 	}
+	if (Snake1CanMove() == true)
+		snake1Move(direction1);
 	else
+	{
+	
 		snake1Move(odir1);
+	/*	direction1 = odir1;*/
+	}
 }
 
 void snake1Wall()
@@ -502,6 +498,8 @@ void snake2Move(int direction)
 				snake2[0].oy = snake2[0].y;
 				snake2[0].x += (dir[direction].x);
 				snake2[0].y += (dir[direction].y);
+				snake2[i].previmg = snake2[i].img;
+				snake2[i].img = direction;
 			}
 			else
 			{
@@ -509,6 +507,8 @@ void snake2Move(int direction)
 				snake2[i].oy = snake2[i].y;
 				snake2[i].x = snake2[i - 1].ox;
 				snake2[i].y = snake2[i - 1].oy;
+				snake2[i].previmg = snake2[i].img;
+				snake2[i].img = snake2[i - 1].previmg;
 			}
 		}
 		Delay();
@@ -554,7 +554,12 @@ void snake2Control()
 			snake2Move(direction2);
 	}
 	else
+	{
+	
 		snake2Move(odir2);
+		//direction2 = odir2;
+	}
+		
 }
 
 void snake2Wall()
@@ -603,10 +608,10 @@ void MakeFruit()
 		{
 			for (; ;)
 			{
-				int x = rand() % 79;
-				int y = rand() % 59;
-				fruit[i].x = x * 10 + Snake_Box.x + 10;
-				fruit[i].y = y * 10 + Snake_Box.y + 10;
+				int x = rand() % 39;
+				int y = rand() % 29;
+				fruit[i].x = x * 20 + Snake_Box.x + 20;
+				fruit[i].y = y * 20 + Snake_Box.y + 20;
 				if (CanPlaceFruitHere(i) == true)
 					break;
 			}
@@ -623,7 +628,7 @@ void MakeObstacle()
 {
 	if (drop1 == true)
 	{
-		for (int i = 0; i < obstacleNum; ++i)
+		for (int i = 0; i < obstacleNum + snake1Length / 4 - 1; ++i)
 		{
 			if (obstacle1state[i] == false)
 			{
@@ -638,7 +643,7 @@ void MakeObstacle()
 
 	if (drop2 == true)
 	{
-		for (int i = 0; i < obstacleNum; ++i)
+		for (int i = 0; i < obstacleNum + snake2Length / 4 - 1 ; ++i)
 		{
 			if (obstacle2state[i] == false)
 			{
@@ -654,7 +659,7 @@ void MakeObstacle()
 
 void DrawObstacle()
 {
-
+	SDL_Texture *bomb_txt = SDL_CreateTextureFromSurface(renderer, bomb_sur);
 	for (int i = 0; i < obstacleNum; ++i)
 	{
 		if (obstacle1state[i] == true)
@@ -663,8 +668,7 @@ void DrawObstacle()
 			obstacle1_rect[i].y = Obstacles1[i].y;
 			obstacle1_rect[i].w = Obstacles1[i].w;
 			obstacle1_rect[i].h = Obstacles1[i].h;
-			SDL_Surface *bomb_sur = IMG_Load("bomb.png");
-			RenderText(bomb_sur, &obstacle1_rect[i]);
+			SDL_RenderCopy(renderer, bomb_txt, NULL, &obstacle1_rect[i]);
 		}
 		if (obstacle2state[i] == true)
 		{
@@ -672,12 +676,10 @@ void DrawObstacle()
 			obstacle2_rect[i].y = Obstacles2[i].y;
 			obstacle2_rect[i].w = Obstacles2[i].w;
 			obstacle2_rect[i].h = Obstacles2[i].h;
-			SDL_Surface *bomb_sur = IMG_Load("bomb.png");
-			RenderText(bomb_sur, &obstacle2_rect[i]);
+			SDL_RenderCopy(renderer, bomb_txt, NULL, &obstacle2_rect[i]);
 		}
 	}
-
-
+	SDL_DestroyTexture(bomb_txt);
 }
 
 bool Snake1EatObstacle()
@@ -850,13 +852,13 @@ void SetUp()
 	odir1 = 1, odir2 = 3;
 	direction1 = 3, direction2 = 1;
 	//tang do kho
-	fruitbeeaten = 0;
+	//fruitbeeaten = 0;
 	level += 1;
 	//Do dai
-	snake1Length = 10;
-	snake2Length = 10;
-	Snake1LengthRect = 10;
-	Snake2LengthRect = 10; // do dai ao, de co kha nang swap do dai
+	snake1Length = 8;
+	snake2Length = 8;
+	Snake1LengthRect = 8;
+	Snake2LengthRect = 8; // do dai ao, de co kha nang swap do dai
 	//dao di chuyen
 	swapdirection1 = 0;
 	swapdirection2 = 0;
@@ -875,13 +877,15 @@ void SetUp()
 	//ve ran
 	for (int i = 0; i < Snake1LengthRect; ++i)
 	{
-		snake1[i].x = Snake_Box.x + 600 + speed*(snake1Length - i);
-		snake1[i].y = Snake_Box.y + 500;
+		snake1[i].x = Snake_Box.x + 200 + speed*(snake1Length - i);
+		snake1[i].y = Snake_Box.y + 400;
+		snake1[i].img = direction2;
 	}
 	for (int i = 0; i < Snake2LengthRect; ++i)
 	{
-		snake2[i].x = Snake_Box.x + speed*i + 10;
-		snake2[i].y = Snake_Box.y + 50;
+		snake2[i].x = Snake_Box.x + speed*i + 20;
+		snake2[i].y = Snake_Box.y + 60;
+		snake2[i].img = direction1;
 	}
 	//bomb
 	drop1 = false;
@@ -1041,7 +1045,9 @@ void LoadGame()
 	{
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "ERRR", SDL_GetError(), windows);
 	}
-
+	Snake_sur = IMG_Load("background.png");
+	Snake_txt = SDL_CreateTextureFromSurface(renderer, Snake_sur);
+	bomb_sur = IMG_Load("bomb.png");
 }
 
 void SnakeOne()
@@ -1059,14 +1065,15 @@ void SnakeTwo()
 //Tang do kho cho game
 void Harder()
 {
-	if (fruitbeeaten > 5 && fruitbeeaten < 10)
+	int sum = snake1Length + snake2Length;
+	if (sum > 10  && sum < 20)
+		level = 1;
+	else if (sum >= 20 && sum<= 30)
 		level = 2;
-	else if (fruitbeeaten > 10 && fruitbeeaten < 20)
+	else if (sum > 30 && sum <= 40)
 		level = 3;
-	else if (fruitbeeaten > 20 && fruitbeeaten < 30)
+	else if (sum  > 40)
 		level = 4;
-	else if (fruitbeeaten > 30)
-		level = 5;
 }
 
 void Logic()
@@ -1137,51 +1144,196 @@ void ContinueGame()
 	}
 }
 
-void DrawScreen()
-{
-	SDL_SetRenderDrawColor(renderer, 227, 229, 129, 158);
-	SDL_RenderClear(renderer);
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-	SDL_RenderFillRect(renderer, &Snake_Box);
+void DrawSnake() {
 	for (int i = 0; i < snake1Length; ++i)
 	{
 		if (i == 0)
 		{
-			SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+			if (snake1[i].img == 1)
+			{
+				snake1_sur[i] = IMG_Load("./sna1img/1.png");
+				
+			}
+			else if (snake1[i].img == 0)
+			{
+				snake1_sur[i] = IMG_Load("./sna1img/0.png");
+			}
+			else if (snake1[i].img == 2)
+			{
+				snake1_sur[i] = IMG_Load("./sna1img/2.png");
+			}
+			else if (snake1[i].img == 3)
+			{
+				snake1_sur[i] = IMG_Load("./sna1img/3.png");
+			}
+		}
+		else if (i == snake1Length - 1)
+		{
+			if (snake1[i-1].img == 1)
+			{
+				snake1_sur[i] = IMG_Load("./sna1img/1duoi.png");
+
+			}
+			else if (snake1[i-1].img == 0)
+			{
+				snake1_sur[i] = IMG_Load("./sna1img/0duoi.png");
+			}
+			else if (snake1[i-1].img == 2)
+			{
+				snake1_sur[i] = IMG_Load("./sna1img/2duoi.png");
+			}
+			else if (snake1[i-1].img == 3)
+			{
+				snake1_sur[i] = IMG_Load("./sna1img/3duoi.png");
+			}
+		}
+		else 
+		{
+			if ((snake1[i].img == 1 && snake1[i-1].img == 2)||
+				(snake1[i].img == 0 && snake1[i-1].img == 3))
+			{
+				snake1_sur[i] = IMG_Load("./sna1img/1203.png");
+			}
+			else if ((snake1[i].img == 1 && snake1[i - 1].img == 1) ||
+				(snake1[i].img == 3 && snake1[i - 1].img == 3))
+			{
+				snake1_sur[i] = IMG_Load("./sna1img/1133.png");
+			}
+			else if ((snake1[i].img == 2 && snake1[i - 1].img == 2) ||
+				(snake1[i].img == 0 && snake1[i - 1].img == 0))
+			{
+				snake1_sur[i] = IMG_Load("./sna1img/2200.png");
+			}
+			else if ((snake1[i].img == 3 && snake1[i - 1].img == 2) ||
+				(snake1[i].img == 0 && snake1[i - 1].img == 1))
+			{
+				snake1_sur[i] = IMG_Load("./sna1img/2301.png");
+			}
+			else if ((snake1[i].img == 2 && snake1[i - 1].img == 3) ||
+				(snake1[i].img == 1 && snake1[i - 1].img == 0))
+			{
+				snake1_sur[i] = IMG_Load("./sna1img/3210.png");
+			}
+			else if ((snake1[i].img == 3 && snake1[i - 1].img == 0) ||
+				(snake1[i].img == 2 && snake1[i - 1].img == 1))
+			{
+				snake1_sur[i] = IMG_Load("./sna1img/3021.png");
+			}
+		}
+		snake1_txt[i] = SDL_CreateTextureFromSurface(renderer, snake1_sur[i]);
+	}
+	for (int i = 0; i < snake2Length; ++i)
+	{
+		if (i == 0)
+		{
+			if (snake2[i].img == 1)
+			{
+				snake2_sur[i] = IMG_Load("./sna2img/1.png");
+
+			}
+			else if (snake2[i].img == 0)
+			{
+				snake2_sur[i] = IMG_Load("./sna2img/0.png");
+			}
+			else if (snake2[i].img == 2)
+			{
+				snake2_sur[i] = IMG_Load("./sna2img/2.png");
+			}
+			else if(snake2[i].img ==3)
+			{
+				snake2_sur[i] = IMG_Load("./sna2img/3.png");
+			}
+		}
+		else if (i == snake2Length - 1)
+		{
+			if (snake2[i - 1].img == 1)
+			{
+				snake2_sur[i] = IMG_Load("./sna2img/1duoi.png");
+			}
+			else if (snake2[i - 1].img == 0)
+			{
+				snake2_sur[i] = IMG_Load("./sna2img/0duoi.png");
+			}
+			else if (snake2[i - 1].img == 2)
+			{
+				snake2_sur[i] = IMG_Load("./sna2img/2duoi.png");
+			}
+			else if (snake2[i-1].img == 3)
+			{
+				snake2_sur[i] = IMG_Load("./sna2img/3duoi.png");
+			}
 		}
 		else
 		{
-			SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+			if ((snake2[i].img == 1 && snake2[i - 1].img == 2) ||
+				(snake2[i].img == 0 && snake2[i - 1].img == 3))
+			{
+				snake2_sur[i] = IMG_Load("./sna2img/1203.png");
+			}
+			else if ((snake2[i].img == 1 && snake2[i - 1].img == 1) ||
+				(snake2[i].img == 3 && snake2[i - 1].img == 3))
+			{
+				snake2_sur[i] = IMG_Load("./sna2img/1133.png");
+			}
+			else if ((snake2[i].img == 2 && snake2[i - 1].img == 2) ||
+				(snake2[i].img == 0 && snake2[i - 1].img == 0))
+			{
+				snake2_sur[i] = IMG_Load("./sna2img/2200.png");
+			}
+			else if ((snake2[i].img == 3 && snake2[i - 1].img == 2) ||
+				(snake2[i].img == 0 && snake2[i - 1].img == 1))
+			{
+				snake2_sur[i] = IMG_Load("./sna2img/2301.png");
+			}
+			else if ((snake2[i].img == 2 && snake2[i - 1].img == 3) ||
+				(snake2[i].img == 1 && snake2[i - 1].img == 0))
+			{
+				snake2_sur[i] = IMG_Load("./sna2img/3210.png");
+			}
+			else if ((snake2[i].img == 3 && snake2[i - 1].img == 0) ||
+				(snake2[i].img == 2 && snake2[i - 1].img == 1))
+			{
+				snake2_sur[i] = IMG_Load("./sna2img/3021.png");
+			}
+			//snake2_txt[i] = SDL_CreateTextureFromSurface(renderer, snake2_sur[i]);
 		}
+		snake2_txt[i] = SDL_CreateTextureFromSurface(renderer, snake2_sur[i]);
+	}
+}
+
+void DrawScreen()
+{
+	SDL_SetRenderDrawColor(renderer, 227, 229, 129, 158);
+	SDL_RenderClear(renderer);
+	/*SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+	SDL_RenderFillRect(renderer, &Snake_Box);*/
+	SDL_RenderCopy(renderer, Snake_txt, NULL, &Snake_Box);
+	for (int i = 0; i < snake1Length; ++i)
+	{
 		if (snake1[i].x != 0 && snake1[i].y != 0)
 		{
 			Snake1_Rect[i].x = snake1[i].x;
 			Snake1_Rect[i].y = snake1[i].y;
 			Snake1_Rect[i].w = snake1[i].w;
 			Snake1_Rect[i].h = snake1[i].h;
-			SDL_RenderFillRect(renderer, &Snake1_Rect[i]);
 		}
 	}
-
 	for (int i = 0; i < snake2Length; ++i)
 	{
-		if (i == 0)
-		{
-			SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-		}
-		else
-		{
-			SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-		}
 		if (snake2[i].x != 0 && snake2[i].y != 0)
 		{
 			Snake2_Rect[i].x = snake2[i].x;
 			Snake2_Rect[i].y = snake2[i].y;
 			Snake2_Rect[i].w = snake2[i].w;
 			Snake2_Rect[i].h = snake2[i].h;
-			SDL_RenderFillRect(renderer, &Snake2_Rect[i]);
+			SDL_RenderCopy(renderer, snake2_txt[i], NULL, &Snake2_Rect[i]);
 		}
 	}
+	DrawSnake();
+	for(int i =0;i<snake1Length;++i)
+	SDL_RenderCopy(renderer, snake2_txt[i], NULL, &Snake2_Rect[i]);
+	for (int i = 0; i<snake1Length; ++i)
+	SDL_RenderCopy(renderer, snake1_txt[i], NULL, &Snake1_Rect[i]);
 	DrawScore();
 	DrawFruit();
 	DrawObstacle();
@@ -1234,6 +1386,19 @@ void Event(bool running)
 
 void Quit()
 {
+	for (int i = 0; i < snake1Length; ++i)
+	{
+		SDL_DestroyTexture(snake1_txt[i]);
+		SDL_FreeSurface(snake1_sur[i]);
+	}
+	for (int i = 0; i < snake2Length; ++i)
+	{
+		SDL_DestroyTexture(snake2_txt[i]);
+		SDL_FreeSurface(snake2_sur[i]);
+	}
+	SDL_FreeSurface(bomb_sur);
+	SDL_DestroyTexture(Snake_txt);
+	SDL_FreeSurface(Snake_sur);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(windows);
 	TTF_CloseFont(comic);
