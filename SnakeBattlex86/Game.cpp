@@ -231,6 +231,7 @@ void Instruction(int *menu, bool *start)
 					*menu = 1;
 				}
 				running = false;
+				*start = true;
 			}
 			else if (occur.type == SDL_QUIT)
 			{
