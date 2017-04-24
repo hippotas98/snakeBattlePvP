@@ -14,34 +14,40 @@ SDL_Event event;
 SDL_Color White = { 255,255,255 };
 void Quit();
 
-
-int Pause() {
-	int input;
-	const SDL_MessageBoxButtonData button[] = {
-		{ 0,0,"Restart" },
-		{ 0,1,"Continue" }
-	};
-	const SDL_MessageBoxColorScheme colorScheme[5] = {
-		{ 255,255,255 }, //background color
-		{ 0,0,0 }, //Text color
-		{ 255,255,0 }, //button color
-		{ 255,255,255 }, //button background
-		{ 0,0,0 } //button text
-	};
-	const SDL_MessageBoxData messageboxdata{
-		SDL_MESSAGEBOX_INFORMATION,
-		NULL,
-		"Pause",
-		"Player 1 use Arrow Key to Move the Snake\nPlayer 2 use A S W D to Move the Snake",
-		2,
-		button,
-		&colorScheme[5],
-	};
-	if (SDL_ShowMessageBox(&messageboxdata, &input) < 0) {
-		SDL_Log("error displaying message box");
-		return -1;
+void Pause(bool *running)
+{
+	const int window_w = 1200;
+	const int window_h = 700;
+	SDL_PollEvent(&event);
+	if (event.type == SDL_MOUSEBUTTONDOWN)
+	{
+		int x = event.motion.x;
+		int y = event.motion.y;
+		if (x > 450 + 81 && x < 450 + 220 && y > 195 + 130 && y < 195 + 161)
+		{
+			pause = false;
+			//break;
+		}
+		else if (x > 450 + 81 && x < 450 + 220 && y > 195 + 192 && y < 195 + 225)
+		{
+			pause = false;
+			SetUpObject();
+			SetUpSnake();
+			//break;
+		}
+		else if (x > 450 + 81 && x < 450 + 220 && y > 195 + 256 && y < 195 + 286)
+		{
+			pause = false;
+			*running = false;
+			Quit();
+		}
 	}
-	return input;
+	else if (event.type == SDL_QUIT)
+	{
+		pause = false;
+		*running = false;
+		Quit();
+	}
 }
 
 bool SelectPause()
@@ -88,8 +94,8 @@ int GameMenu() {
 	MenuRect[1].h = 70;
 	MenuRect[0].w = 120;
 	MenuRect[1].w = 100;
-	MenuSur[0] = TTF_RenderText_Solid(times, Menu[0], green);
-	MenuSur[1] = TTF_RenderText_Solid(times, Menu[1], green);
+	MenuSur[0] = TTF_RenderText_Solid(comic, Menu[0], green);
+	MenuSur[1] = TTF_RenderText_Solid(comic, Menu[1], green);
 
 	IMG_Init(IMG_INIT_PNG);
 	Background = IMG_Load("./img/menu.png");
@@ -133,7 +139,7 @@ int GameMenu() {
 						{
 							Selected[i] = 1;
 							SDL_DestroyTexture(MenuText[i]);
-							SDL_Surface *Temp = TTF_RenderText_Solid(times, Menu[i], red);
+							SDL_Surface *Temp = TTF_RenderText_Solid(comic, Menu[i], red);
 							MenuText[i] = SDL_CreateTextureFromSurface(renderer, Temp);
 							SDL_FreeSurface(Temp);
 						}
@@ -144,7 +150,7 @@ int GameMenu() {
 						{
 							Selected[i] = 0;
 							SDL_DestroyTexture(MenuText[i]);
-							SDL_Surface *Temp = TTF_RenderText_Solid(times, Menu[i], green);
+							SDL_Surface *Temp = TTF_RenderText_Solid(comic, Menu[i], green);
 							MenuText[i] = SDL_CreateTextureFromSurface(renderer, Temp);
 							SDL_FreeSurface(Temp);
 						}
@@ -293,16 +299,26 @@ void Logic()
 	Harder();
 }
 
-void Event(bool running)
+void Event(bool *running)
 {
 	if (event.type == SDL_KEYDOWN)
 	{
 		if (event.key.keysym.sym == SDLK_p)
 		{
 			if (!pause)
+			{
 				pause = true;
-			else if (pause)
-				pause = false;
+				DrawPauseMenu();
+				DrawPauseButton();
+				while (pause)
+				{
+					SDL_PollEvent(&event);
+					if (event.type == SDL_KEYDOWN)
+						if (event.key.keysym.sym == SDLK_p)
+							pause = false;
+					Pause(running);
+				}
+			}
 		}
 	}
 	if (pause == false)
@@ -310,16 +326,11 @@ void Event(bool running)
 		if (SelectPause() == true)
 		{
 			pause = true;
+			DrawPauseMenu();
 			DrawPauseButton();
-			if (Pause() == 1)
+			while (pause == true)
 			{
-				pause = false;
-			}
-			else
-			{
-				pause = false;
-				SetUpSnake();
-				SetUpObject();
+				Pause(running);
 			}
 		}
 	}
@@ -341,6 +352,8 @@ void Quit()
 		SDL_DestroyTexture(background_Txt[i]);
 		SDL_FreeSurface(background_Sur[i]);
 	}
+	SDL_FreeSurface(pause_menu_Sur);
+	SDL_DestroyTexture(pause_menu_Txt);
 	SDL_FreeSurface(rock_Sur);
 	SDL_DestroyTexture(rock_Txt);
 	SDL_VideoQuit();
@@ -395,7 +408,9 @@ int main(int argv, char ** args)
 					break;
 				}
 			}
-			Event(running);
+			Event(&running);
+			if (running == false)
+				break;
 			if (pause == false)
 			{
 				Logic();

@@ -38,6 +38,8 @@ extern SDL_Texture *rock_Txt;
 extern SDL_Surface *rock_Sur;
 extern SDL_Texture *background_Txt[3];
 extern SDL_Surface *background_Sur[3];
+extern SDL_Texture *pause_menu_Txt;
+extern SDL_Surface *pause_menu_Sur;
 
 
 void DrawFruit();
@@ -46,6 +48,7 @@ void DrawPauseButton();
 void DrawScore();
 void DrawScreen();
 void DrawSnake();
+void DrawPauseMenu();
 void LoadGame();
 void PrintResult();
 void RenderText (SDL_Surface *, SDL_Rect *);

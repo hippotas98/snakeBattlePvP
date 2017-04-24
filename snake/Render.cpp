@@ -34,6 +34,9 @@ SDL_Surface *rock_Sur;
 SDL_Rect rock_Rect[3];
 SDL_Texture *background_Txt[3];
 SDL_Surface *background_Sur[3];
+SDL_Texture *pause_menu_Txt;
+SDL_Surface *pause_menu_Sur;
+
 int odir[2], direction[2], winner;
 int snakeLength[2], snakeLengthRect[2];
 int level;
@@ -127,6 +130,17 @@ void DrawPauseButton()
 	SDL_RenderPresent(renderer);
 }
 
+void DrawPauseMenu()
+{
+	SDL_Rect pause_menu_Rect;
+	pause_menu_Rect.x = 600 - 150;
+	pause_menu_Rect.y = 350 - 155;
+	pause_menu_Rect.w = 300;
+	pause_menu_Rect.h = 313;
+	SDL_RenderCopy(renderer, pause_menu_Txt, NULL, &pause_menu_Rect);
+	//SDL_RenderPresent(renderer);
+}
+
 void LoadGame()
 {
 	const int window_w = 1200;
@@ -141,12 +155,12 @@ void LoadGame()
 	SetUpSnake();
 	SetUpObject();
 
-	times = TTF_OpenFont("./font/times.ttf", 50);
+	times = TTF_OpenFont("./font/times.ttf", 60);
 	if (times == NULL)
 	{
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "ERRR", SDL_GetError(), windows);
 	}
-	comic = TTF_OpenFont("./font/comic.ttf", 75);
+	comic = TTF_OpenFont("./font/comic.ttf", 80);
 	if (comic == NULL)
 	{
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "ERRR", SDL_GetError(), windows);
@@ -159,6 +173,8 @@ void LoadGame()
 	fruit_Txt = SDL_CreateTextureFromSurface(renderer, fruit_Sur);
 	rock_Sur = IMG_Load("./img/rock.png");
 	rock_Txt = SDL_CreateTextureFromSurface(renderer, rock_Sur);
+	pause_menu_Sur = IMG_Load("./img/pausemenu.png");
+	pause_menu_Txt = SDL_CreateTextureFromSurface(renderer, pause_menu_Sur);
 
 	snake_Sur[0][0] = IMG_Load("./sna1img/0.png");
 	snake_Sur[0][1] = IMG_Load("./sna1img/1.png");
