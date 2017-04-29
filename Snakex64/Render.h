@@ -40,6 +40,9 @@ extern SDL_Texture *background_Txt[3];
 extern SDL_Surface *background_Sur[3];
 extern SDL_Texture *pause_menu_Txt;
 extern SDL_Surface *pause_menu_Sur;
+extern SDL_Surface *music_sur[2];
+extern SDL_Texture *music_txt[2];
+extern SDL_Rect Screen;
 
 
 void DrawFruit();
@@ -53,7 +56,9 @@ void LoadGame();
 void PrintResult();
 void RenderText (SDL_Surface *, SDL_Rect *);
 void Comment();
-
+void DrawMuteButton();
+void Quit();
+void QuitSurface();
 
 #endif
 

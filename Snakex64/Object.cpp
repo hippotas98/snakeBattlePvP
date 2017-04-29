@@ -5,6 +5,7 @@
 #include "Object.h"
 #include "SDL_ttf.h"
 #include "Sound.h"
+#include "Render.h"
 
 
 int window_w, window_h;
@@ -177,6 +178,7 @@ void SetUpObject()
 	window_w = 1200;
 	snakeFruit = 3;
 	eatFruit = true;
+	mute = false;
 	for (int i = 0; i < 2; ++i)
 	{
 		drop[i] = false;

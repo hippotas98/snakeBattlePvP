@@ -12,12 +12,10 @@
 
 SDL_Event event;
 SDL_Color White = { 255,255,255 };
-void Quit();
+//void Quit();
 
 void Pause(bool *running)
 {
-	const int window_w = 1200;
-	const int window_h = 700;
 	SDL_PollEvent(&event);
 	if (event.type == SDL_MOUSEBUTTONDOWN)
 	{
@@ -66,6 +64,84 @@ bool SelectPause()
 	return false;
 }
 
+bool SelectMute()
+{
+	const int window_w = 1200;
+	const int window_h = 700;
+	if (event.type == SDL_MOUSEBUTTONDOWN)
+	{
+		int mx = event.motion.x;
+		int my = event.motion.y;
+		if (mx > window_w/2 + 50  && mx < window_w / 2 + 100 && my > 0 && my < 50)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+void Music()
+{
+	if (SelectMute())
+	{
+		if (mute == true)
+			mute = false;
+		else if(mute == false) mute = true;
+		if (Mix_PausedMusic() == 1)
+		{
+			if (mute == false)
+			{
+				Mix_ResumeMusic();
+			}
+		}
+		else
+		{
+			if (mute == true)
+			{
+				Mix_PauseMusic();
+			}
+		}
+	}
+}
+
+void PauseGame(bool *running)
+{
+	if (event.type == SDL_KEYDOWN)
+	{
+		if (event.key.keysym.sym == SDLK_p)
+		{
+			if (!pause)
+			{
+				pause = true;
+				DrawPauseMenu();
+				DrawPauseButton();
+				SDL_RenderPresent(renderer);
+				while (pause)
+				{
+					Pause(running);
+					if (event.type == SDL_KEYDOWN)
+						if (event.key.keysym.sym == SDLK_p)
+							pause = false;
+				}
+			}
+		}
+	}
+	if (pause == false)
+	{
+		if (SelectPause() == true)
+		{
+			pause = true;
+			DrawPauseMenu();
+			DrawPauseButton();
+			SDL_RenderPresent(renderer);
+			while (pause == true)
+			{
+				Pause(running);
+			}
+		}
+	}
+}
+
 int GameMenu() {
 
 	Uint32 time;
@@ -87,8 +163,6 @@ int GameMenu() {
 
 	MenuRect[0] = { 670,345,120,70 };
 	MenuRect[1] = { 680,460,100,70 };
-	MenuSur[0] = TTF_RenderText_Solid(comic, Menu[0], green);
-	MenuSur[1] = TTF_RenderText_Solid(comic, Menu[1], green);
 
 	IMG_Init(IMG_INIT_PNG);
 	Background = IMG_Load("./img/menu.png");
@@ -99,6 +173,7 @@ int GameMenu() {
 	RenderText(Background, &Screen);
 	for (int i = 0; i < 2; ++i)
 	{
+		MenuSur[i] = TTF_RenderText_Solid(comic, Menu[i], green);
 		MenuText[i] = SDL_CreateTextureFromSurface(renderer, MenuSur[i]);
 		SDL_RenderCopy(renderer, MenuText[i], NULL, &MenuRect[i]);
 	}
@@ -113,8 +188,8 @@ int GameMenu() {
 			case SDL_QUIT:
 				for (int i = 0; i < 2; ++i)
 				{
-					SDL_FreeSurface(MenuSur[0]);
-					SDL_DestroyTexture(MenuText[0]);
+					SDL_FreeSurface(MenuSur[i]);
+					SDL_DestroyTexture(MenuText[i]);
 				}
 				Quit();
 				break;
@@ -167,8 +242,8 @@ int GameMenu() {
 					{
 						for (int i = 0; i < 2; ++i)
 						{
-							SDL_FreeSurface(MenuSur[0]);
-							SDL_DestroyTexture(MenuText[0]);
+							SDL_FreeSurface(MenuSur[i]);
+							SDL_DestroyTexture(MenuText[i]);
 						}
 						return i;
 					}
@@ -181,8 +256,8 @@ int GameMenu() {
 				{
 					for (int i = 0; i < 2; ++i)
 					{
-						SDL_FreeSurface(MenuSur[0]);
-						SDL_DestroyTexture(MenuText[0]);
+						SDL_FreeSurface(MenuSur[i]);
+						SDL_DestroyTexture(MenuText[i]);
 					}
 					return 1;
 				}
@@ -306,78 +381,8 @@ void Logic()
 
 void Event(bool *running)
 {
-	if (event.type == SDL_KEYDOWN)
-	{
-		if (event.key.keysym.sym == SDLK_p)
-		{
-			if (!pause)
-			{
-				pause = true;
-				DrawPauseMenu();
-				DrawPauseButton();
-				while (pause)
-				{
-					Pause(running);
-					if (event.type == SDL_KEYDOWN)
-						if (event.key.keysym.sym == SDLK_p)
-							pause = false;
-				}
-			}
-		}
-	}
-	if (pause == false)
-	{
-		if (SelectPause() == true)
-		{
-			pause = true;
-			DrawPauseMenu();
-			DrawPauseButton();
-			while (pause == true)
-			{
-				Pause(running);
-			}
-		}
-	}
-}
-
-void Quit()
-{
-	QuitSound();
-	for (int j = 0; j < 2; ++j)
-	{
-		for (int i = 0; i < 14; ++i)
-		{
-			SDL_DestroyTexture(snake_Txt[j][i]);
-			SDL_FreeSurface(snake_Sur[j][i]);
-		}
-	}
-	for (int i = 0; i < 3; ++i)
-	{
-		SDL_DestroyTexture(background_Txt[i]);
-		SDL_FreeSurface(background_Sur[i]);
-	}
-	SDL_FreeSurface(pause_menu_Sur);
-	SDL_DestroyTexture(pause_menu_Txt);
-	SDL_FreeSurface(rock_Sur);
-	SDL_DestroyTexture(rock_Txt);
-	SDL_VideoQuit();
-	SDL_FreeSurface(play_button);
-	SDL_DestroyTexture(play_txt);
-	SDL_FreeSurface(pause_button);
-	SDL_DestroyTexture(pause_txt);
-	SDL_FreeSurface(bomb_Sur);
-	SDL_DestroyTexture(screen_Txt);
-	SDL_FreeSurface(screen_Sur);
-	SDL_DestroyTexture(bomb_Txt);
-	SDL_DestroyTexture(fruit_Txt);
-	SDL_FreeSurface(fruit_Sur);
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(windows);
-	TTF_CloseFont(comic);
-	TTF_CloseFont(times);
-	SDL_Quit();
-	TTF_Quit();
-	IMG_Quit();
+	PauseGame(running);
+	Music();
 }
 
 int main(int argv, char ** args)

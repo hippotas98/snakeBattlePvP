@@ -28,6 +28,7 @@ extern bool obstacleState[2][40];
 extern bool eatFruit;
 extern bool drop[2];
 extern int dropped[2];
+extern bool mute;
 
 
 bool CanPlaceFruitHere(int);

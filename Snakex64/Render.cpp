@@ -31,18 +31,20 @@ SDL_Texture *play_txt, *pause_txt;
 SDL_Texture *bomb_Txt;
 SDL_Texture *rock_Txt;
 SDL_Surface *rock_Sur;
+SDL_Surface *music_sur[2];
+SDL_Texture *music_txt[2];
 SDL_Rect rock_Rect[3];
 SDL_Texture *background_Txt[3];
 SDL_Surface *background_Sur[3];
 SDL_Texture *pause_menu_Txt;
 SDL_Surface *pause_menu_Sur;
-
+SDL_Rect Screen;
 int odir[2], direction[2], winner;
 int snakeLength[2], snakeLengthRect[2];
 int level[2];
 bool stop;
 bool pause;
-
+bool mute;
 void RenderText(SDL_Surface *sur, SDL_Rect *Rect) {
 	SDL_Texture *text = NULL;
 	text = SDL_CreateTextureFromSurface(renderer, sur);
@@ -154,14 +156,6 @@ void DrawScore()
 void DrawPauseButton()
 {
 	SDL_Rect button_img = { window_w / 2 - 25,0,50,50 };
-	/*if (pause == false)*/
-		pause_button = IMG_Load("./img/pause.png");
-	/*else*/
-		play_button = IMG_Load("./img/play.png");
-	if (pause_button == NULL || play_button == NULL)
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Err", SDL_GetError(), windows);
-	play_txt = SDL_CreateTextureFromSurface(renderer, play_button);
-	pause_txt = SDL_CreateTextureFromSurface(renderer, pause_button);
 	if (pause == false)
 	{
 		SDL_RenderCopy(renderer, pause_txt, NULL, &button_img);
@@ -170,7 +164,7 @@ void DrawPauseButton()
 	{
 		SDL_RenderCopy(renderer, play_txt, NULL, &button_img);
 	}
-	SDL_RenderPresent(renderer);
+	//SDL_RenderPresent(renderer);
 }
 
 void DrawPauseMenu()
@@ -188,8 +182,8 @@ void LoadGame()
 {
 	const int window_w = 1200;
 	const int window_h = 700;
+	Screen = { 0,0,1200,700 };
 	SDL_Init(SDL_INIT_EVERYTHING);
-	int video = SDL_VideoInit(NULL);
 	TTF_Init();
 	InitSound();
 	IMG_Init(IMG_INIT_PNG);
@@ -218,6 +212,17 @@ void LoadGame()
 	rock_Txt = SDL_CreateTextureFromSurface(renderer, rock_Sur);
 	pause_menu_Sur = IMG_Load("./img/pausemenu.png");
 	pause_menu_Txt = SDL_CreateTextureFromSurface(renderer, pause_menu_Sur);
+	music_sur[0] = IMG_Load("./img/mute.png");
+	music_sur[1] = IMG_Load("./img/unmute.png");
+	pause_button = IMG_Load("./img/pause.png");
+	play_button = IMG_Load("./img/play.png");
+	if (pause_button == NULL || play_button == NULL)
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Err", SDL_GetError(), windows);
+	play_txt = SDL_CreateTextureFromSurface(renderer, play_button);
+	pause_txt = SDL_CreateTextureFromSurface(renderer, pause_button);
+
+	for (int i = 0; i < 2; ++i)
+		music_txt[i] = SDL_CreateTextureFromSurface(renderer,music_sur[i]);
 
 	snake_Sur[0][0] = IMG_Load("./sna1img/0.png");
 	snake_Sur[0][1] = IMG_Load("./sna1img/1.png");
@@ -259,7 +264,10 @@ void LoadGame()
 	background_Sur[1] = IMG_Load("./img/1win2lose.png");
 	background_Sur[2] = IMG_Load("./img/2win1lose.png");
 	for (int i = 0; i < 3; ++i)
+	{
 		background_Txt[i] = SDL_CreateTextureFromSurface(renderer, background_Sur[i]);
+	}
+	QuitSurface();
 }
 
 void PrintResult()
@@ -274,6 +282,7 @@ void PrintResult()
 }
 
 void DrawSnake() {
+	
 	for (int j = 0; j < 2; ++j)
 	{
 		for (int i = 0; i < snakeLength[j]; ++i)
@@ -290,10 +299,12 @@ void DrawSnake() {
 				}
 				else if (Snake[j][i].img == 2)
 				{
+					
 					SDL_RenderCopy(renderer, snake_Txt[j][2], NULL, &snake_Rect[j][i]);
 				}
 				else if (Snake[j][i].img == 3)
 				{
+					
 					SDL_RenderCopy(renderer, snake_Txt[j][3], NULL, &snake_Rect[j][i]);
 				}
 			}
@@ -301,18 +312,22 @@ void DrawSnake() {
 			{
 				if (Snake[j][i - 1].img == 1)
 				{
+					
 					SDL_RenderCopy(renderer, snake_Txt[j][5], NULL, &snake_Rect[j][i]);
 				}
 				else if (Snake[j][i - 1].img == 0)
 				{
+					
 					SDL_RenderCopy(renderer, snake_Txt[j][4], NULL, &snake_Rect[j][i]);
 				}
 				else if (Snake[j][i - 1].img == 2)
 				{
+					
 					SDL_RenderCopy(renderer, snake_Txt[j][6], NULL, &snake_Rect[j][i]);
 				}
 				else if (Snake[j][i - 1].img == 3)
 				{
+					
 					SDL_RenderCopy(renderer, snake_Txt[j][7], NULL, &snake_Rect[j][i]);
 				}
 			}
@@ -321,34 +336,41 @@ void DrawSnake() {
 				if ((Snake[j][i].img == 1 && Snake[j][i - 1].img == 2) ||
 					(Snake[j][i].img == 0 && Snake[j][i - 1].img == 3))
 				{
+					
 					SDL_RenderCopy(renderer, snake_Txt[j][10], NULL, &snake_Rect[j][i]);
 				}
 				else if ((Snake[j][i].img == 1 && Snake[j][i - 1].img == 1) ||
 					(Snake[j][i].img == 3 && Snake[j][i - 1].img == 3))
 				{
+					
 					SDL_RenderCopy(renderer, snake_Txt[j][8], NULL, &snake_Rect[j][i]);
 				}
 				else if ((Snake[j][i].img == 2 && Snake[j][i - 1].img == 2) ||
 					(Snake[j][i].img == 0 && Snake[j][i - 1].img == 0))
 				{
+					
 					SDL_RenderCopy(renderer, snake_Txt[j][9], NULL, &snake_Rect[j][i]);
 				}
 				else if ((Snake[j][i].img == 3 && Snake[j][i - 1].img == 2) ||
 					(Snake[j][i].img == 0 && Snake[j][i - 1].img == 1))
 				{
+					
 					SDL_RenderCopy(renderer, snake_Txt[j][11], NULL, &snake_Rect[j][i]);
 				}
 				else if ((Snake[j][i].img == 2 && Snake[j][i - 1].img == 3) ||
 					(Snake[j][i].img == 1 && Snake[j][i - 1].img == 0))
 				{
+					
 					SDL_RenderCopy(renderer, snake_Txt[j][13], NULL, &snake_Rect[j][i]);
 				}
 				else if ((Snake[j][i].img == 3 && Snake[j][i - 1].img == 0) ||
 					(Snake[j][i].img == 2 && Snake[j][i - 1].img == 1))
 				{
+					
 					SDL_RenderCopy(renderer, snake_Txt[j][12], NULL, &snake_Rect[j][i]);
 				}
 			}
+			//SDL_DestroyTexture(snake_Txt[j][i]);
 			//snake_Txt[0][i] = SDL_CreateTextureFromSurface(renderer, snake_Sur[0][i]);
 		}
 	}
@@ -366,6 +388,15 @@ void DrawRock()
 	}
 }
 
+void DrawMuteButton()
+{
+	SDL_Rect mute_rect = { 650,0,50,50 };
+	if (mute == false)
+		SDL_RenderCopy(renderer, music_txt[1], NULL, &mute_rect);
+	else if (mute == true)
+		SDL_RenderCopy(renderer, music_txt[0], NULL, &mute_rect);
+}
+
 void Comment()
 {
 	SDL_Surface *comment;
@@ -381,9 +412,9 @@ void Comment()
 
 void DrawScreen()
 {
-	//SDL_SetRenderDrawColor(renderer, 227, 229, 129, 158);
+	SDL_SetRenderDrawColor(renderer, 227, 229, 129, 158);
 	//SDL_RenderClear(renderer);
-	SDL_Rect Screen = { 0,0,1200,700 };
+
 	if (stop == false)
 	{
 		SDL_RenderCopy(renderer, background_Txt[0], NULL, &Screen);
@@ -395,6 +426,7 @@ void DrawScreen()
 		else if (winner == 1)
 			SDL_RenderCopy(renderer, background_Txt[2], NULL, &Screen);
 	}
+
 	SDL_RenderCopy(renderer, screen_Txt, NULL, &Snake_Box);
 	if (swapdirection[0] == 1 || swapdirection[1] == 1)
 	{
@@ -429,9 +461,12 @@ void DrawScreen()
 	DrawSnake();
 	DrawScore();
 	DrawFruit();
+	DrawMuteButton();
 	DrawObstacle();
 	if (stop == false)
+	{
 		DrawPauseButton();
+	}
 	if (stop == true) //stop cho logic, pause cho render
 	{
 		pause = true;
@@ -439,4 +474,62 @@ void DrawScreen()
 		ContinueGame();
 	}
 	SDL_RenderPresent(renderer);
+}
+
+void Quit()
+{
+	QuitSound();
+	for (int j = 0; j < 2; ++j)
+	{
+		for (int i = 0; i < 14; ++i)
+		{
+			SDL_DestroyTexture(snake_Txt[j][i]);
+			//SDL_FreeSurface(snake_Sur[j][i]);
+		}
+		SDL_DestroyTexture(music_txt[j]);
+	}
+	for (int i = 0; i < 3; ++i)
+	{
+		SDL_DestroyTexture(background_Txt[i]);
+		//SDL_FreeSurface(background_Sur[i]);
+	}
+	
+	SDL_DestroyTexture(pause_menu_Txt);
+	SDL_DestroyTexture(rock_Txt);
+	SDL_DestroyTexture(play_txt);
+	SDL_DestroyTexture(pause_txt);
+	SDL_DestroyTexture(screen_Txt);
+	SDL_DestroyTexture(bomb_Txt);
+	SDL_DestroyTexture(fruit_Txt);
+	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(windows);
+	TTF_CloseFont(comic);
+	TTF_CloseFont(times);
+	SDL_Quit();
+	TTF_Quit();
+	IMG_Quit();
+}
+
+void QuitSurface()
+{
+	for (int j = 0; j < 2; ++j)
+	{
+		SDL_FreeSurface(music_sur[j]);
+		for (int i = 0; i < 14; ++i)
+		{
+
+			SDL_FreeSurface(snake_Sur[j][i]);
+		}
+	}
+	for (int i = 0; i < 3; ++i)
+	{
+		SDL_FreeSurface(background_Sur[i]);
+	}
+	SDL_FreeSurface(pause_menu_Sur);
+	SDL_FreeSurface(rock_Sur);
+	SDL_FreeSurface(play_button);
+	SDL_FreeSurface(pause_button);
+	SDL_FreeSurface(fruit_Sur);
+	SDL_FreeSurface(screen_Sur);
+	SDL_FreeSurface(bomb_Sur);
 }
