@@ -85,19 +85,13 @@ void Music()
 		if (mute == true)
 			mute = false;
 		else if (mute == false) mute = true;
-		if (Mix_PausedMusic() == 1)
+		if (mute == false)
 		{
-			if (mute == false)
-			{
-				Mix_ResumeMusic();
-			}
+			Mix_ResumeMusic();
 		}
-		else
+		if (mute == true)
 		{
-			if (mute == true)
-			{
-				Mix_PauseMusic();
-			}
+			Mix_PauseMusic();
 		}
 	}
 }

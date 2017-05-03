@@ -58,6 +58,17 @@ bool CanPlaceFruitHere(int i)
 				return false;
 		}
 	}
+	for (int m = 0; m < 2; ++m)
+	{
+		for (int j = 0; j < 3; ++j)
+		{
+			if (Fruit[m].x >= Rock[j].x && Fruit[m].x <= Rock[j].x + Rock[j].w
+				&& Fruit[m].y >= Rock[j].y && Fruit[m].y <= Rock[j].y + Rock[j].h
+				&& Fruit[m].x + 20 >= Rock[j].x && Fruit[m].x + 20 <= Rock[j].x + Rock[j].w
+				&& Fruit[m].y + 20 >= Rock[j].y && Fruit[m].y + 20 <= Rock[j].y + Rock[j].h)
+				return false;
+		}
+	}
 	return true;
 }
 
