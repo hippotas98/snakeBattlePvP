@@ -1,0 +1,107 @@
+# depslib dependency file v1.0
+1494947832 source:c:\users\administrator\desktop\snake\game.cpp
+	"SnakeF.h"
+	"Object.h"
+	"PowerUps.h"
+	"Render.h"
+	"iostream"
+	<SDL2/SDL.h>
+	"SDL2/SDL_image.h"
+	"SDL2/SDL_ttf.h"
+	<SDL2/SDL_mixer.h>
+	"Sound.h"
+	"Menu.h"
+
+1494947590 c:\users\administrator\desktop\snake\snakef.h
+	"SDL2/SDL.h"
+	"cmath"
+
+1494945184 c:\users\administrator\desktop\snake\object.h
+	"SnakeF.h"
+	"PowerUps.h"
+	<cstdlib>
+	<ctime>
+
+1494947590 c:\users\administrator\desktop\snake\powerups.h
+	"SnakeF.h"
+	"Object.h"
+	"cstdlib"
+	"SDL2/SDL.h"
+
+1494947590 c:\users\administrator\desktop\snake\render.h
+	"SDL2/SDL.h"
+	"SDL2/SDL_image.h"
+	"SDL2/SDL_ttf.h"
+	"Object.h"
+	"PowerUps.h"
+	"SnakeF.h"
+	"sstream"
+	"iostream"
+
+1494947590 c:\users\administrator\desktop\snake\sound.h
+	<SDL2/SDL.h>
+	<SDL2/SDL_mixer.h>
+
+1494947590 c:\users\administrator\desktop\snake\menu.h
+	"SDL2/SDL.h"
+
+1494947590 source:c:\users\administrator\desktop\snake\menu.cpp
+	"Menu.h"
+	"SnakeF.h"
+	"Object.h"
+	"PowerUps.h"
+	"Render.h"
+	"iostream"
+	"SDL2/SDL.h"
+	"SDL2/SDL_image.h"
+	"SDL2/SDL_ttf.h"
+	<SDL2/SDL_mixer.h>
+	"Sound.h"
+
+1494947610 source:c:\users\administrator\desktop\snake\object.cpp
+	"SnakeF.h"
+	"PowerUps.h"
+	<cstdlib>
+	<ctime>
+	"Object.h"
+	"SDL2/SDL_ttf.h"
+	"Sound.h"
+	"Render.h"
+
+1494947590 source:c:\users\administrator\desktop\snake\powerups.cpp
+	"SnakeF.h"
+	"Object.h"
+	"cstdlib"
+	"SDL2/SDL.h"
+	"SDL2/SDL_ttf.h"
+	"PowerUps.h"
+	"Render.h"
+
+1494947590 source:c:\users\administrator\desktop\snake\snakef.cpp
+	"SDL2/SDL.h"
+	"cmath"
+	"SnakeF.h"
+	"Object.h"
+
+1494947590 source:c:\users\administrator\desktop\snake\sound.cpp
+	"Sound.h"
+	"SDL2/SDL_mixer.h"
+	"Render.h"
+
+1494947729 source:c:\users\administrator\desktop\snake\render.cpp
+	"SDL2/SDL.h"
+	"SDL2/SDL_image.h"
+	"SDL2/SDL_ttf.h"
+	"Object.h"
+	"PowerUps.h"
+	"SnakeF.h"
+	"sstream"
+	"iostream"
+	"Render.h"
+	"Sound.h"
+
+1494948551 source:c:\users\administrator\desktop\snake\resource.rc
+	"resource.h"
+
+1494948550 c:\users\administrator\desktop\snake\resource.h
+
